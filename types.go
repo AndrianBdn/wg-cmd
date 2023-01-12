@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/lithammer/dedent"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
 	"os"
@@ -18,6 +19,7 @@ type server struct {
 	ServerConfigPath string
 	Address4         string
 	Address6         string
+	PresharedKey     string
 	PrivateKey       string
 	PublicKey        string
 	ListenPort       uint16
@@ -25,17 +27,20 @@ type server struct {
 	PostDown4        string
 	PostUp6          string
 	PostDown6        string
+	ClientRoute      string
+	ClientDNS        string
+	ServerHost       string
 	addrInfo4        *addressInfo4
 	addrInfo6        *addressInfo6
 }
 
 type addressInfo4 struct {
-	server byte
+	server uint16
 	prefix string
 }
 
 type addressInfo6 struct {
-	server byte
+	server uint16
 	prefix string
 }
 
@@ -75,7 +80,7 @@ func readServer() (*server, error) {
 		prefix := strconv.Itoa(int(ip4[0])) + "." +
 			strconv.Itoa(int(ip4[1])) + "." +
 			strconv.Itoa(int(ip4[2])) + "."
-		s.addrInfo4 = &addressInfo4{prefix: prefix, server: ip4[3]}
+		s.addrInfo4 = &addressInfo4{prefix: prefix, server: uint16(ip4[3])}
 	}
 
 	if s.Address6 != "" {
@@ -96,7 +101,7 @@ func readServer() (*server, error) {
 		if len(ip6parts) != 2 {
 			return nil, fmt.Errorf("address6 cannot find :: in IP6 addr")
 		}
-		s.addrInfo6 = &addressInfo6{prefix: ip6parts[0], server: ip[15]}
+		s.addrInfo6 = &addressInfo6{prefix: ip6parts[0], server: uint16(ip[15])}
 	}
 
 	return &s, nil
@@ -114,33 +119,60 @@ func readClient(fileName string, ipNum int, name string) (*client, error) {
 	return &c, nil
 }
 
-func newServer(iface string, addr4 string, addr6 string) *server {
+func newClient(ip int, name string) *client {
+	fileName := fmt.Sprintf("%03d-%s.toml", ip, name)
+	c := client{ipNum: ip, name: name, fileName: fileName}
+	key, err := wgtypes.GeneratePrivateKey()
+	if err != nil {
+		panic("Can't generate wireguard keypair, err: " + err.Error())
+	}
+	c.PrivateKey = key.String()
+	c.PublicKey = key.PublicKey().String()
+	return &c
+}
+
+func newServer(iface string, addr4 string, addr6 string, serverHost string) *server {
 	s := server{}
 	s.Address4 = addr4
 	s.Address6 = addr6
 	s.Interface = iface
 	s.ServerConfigPath = "/etc/wireguard/" + iface + ".conf"
 	s.ListenPort = 51820
-	key, err := wgtypes.GeneratePrivateKey()
+	key, err := wgtypes.GenerateKey()
+	if err != nil {
+		panic("Can't generate wireguard pre-shared key, err: " + err.Error())
+	}
+	s.PresharedKey = key.String()
+
+	key, err = wgtypes.GeneratePrivateKey()
 	if err != nil {
 		panic("Can't generate wireguard keypair, err: " + err.Error())
 	}
 	s.PrivateKey = key.String()
 	s.PublicKey = key.PublicKey().String()
-	s.PostUp4 = "iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE;"
+	s.PostUp4 = "iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
 	s.PostUp6 = "ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-	s.PostDown4 = "iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE;"
+	s.PostDown4 = "iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
 	s.PostDown6 = "ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
+	s.ClientRoute = "0.0.0.0/0, ::/0"
+	s.ClientDNS = "1.1.1.1"
+	s.ServerHost = serverHost
+
 	return &s
+}
+
+func writeConfigHeader(f *os.File) {
+	_, _ = f.WriteString(strings.TrimLeft(dedent.Dedent(`
+				# Warning: this is not a Wireguard config
+				# This file uses TOML (toml.io) syntax, instead of Wireguard 
+				# wg-dir-conf tool builds Wireguard config using files in this directories
+				# >> You are welcome to edit this file, it wont be overwritten.
+				`), "\n"))
 }
 
 func (s *server) save() error {
 	f, err := os.OpenFile(serverFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-
-	_, _ = f.WriteString("# Warning: this is not a Wireguard config\n")
-	_, _ = f.WriteString("# wg-dir-conf tool builds real config using directories in this file\n")
-	_, _ = f.WriteString("# you are welcome to edit this file, it wont be overwritten\n\n")
-
+	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("server.save, can't create %s file %w", serverFileName, err)
 	}
@@ -150,7 +182,25 @@ func (s *server) save() error {
 	}
 
 	if err := f.Close(); err != nil {
-		return fmt.Errorf("server.save, can't close _server.toml file %w", err)
+		return fmt.Errorf("server.save, can't close %s file %w", serverFileName, err)
+	}
+
+	return nil
+}
+
+func (c *client) writeOnce() error {
+	f, err := os.OpenFile(c.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	writeConfigHeader(f)
+	if err != nil {
+		return fmt.Errorf("client.writeOnce, can't create %s file %w", c.fileName, err)
+	}
+
+	if err := toml.NewEncoder(f).Encode(c); err != nil {
+		return fmt.Errorf("client.writeOnce, error TOML encoding server struct %w", err)
+	}
+
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("client.writeOnce, can't close %s file %w", c.fileName, err)
 	}
 
 	return nil

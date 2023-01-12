@@ -13,7 +13,7 @@ func printUsageAndQuit() {
 	fmt.Println("\nAvailable commands:")
 	fmt.Println("\tinit\tinit an empty wg-dir-conf directory")
 	fmt.Println("\tmake\tcreate a wireguard config out of wg-dir-conf directory")
-	fmt.Println("\talloc\tallocate new client and print its config")
+	fmt.Println("\talloc\tallocate new peer (client) and print its config")
 	fmt.Println("\tprint\tprint client config (only possible when private key is saved)")
 	os.Exit(1)
 }
@@ -26,12 +26,17 @@ func main() {
 		printUsageAndQuit()
 	}
 
+	subArgs := os.Args[2:]
+
 	switch os.Args[1] {
 	case "init":
-		runInit(os.Args[2:])
+		runInit(subArgs)
 
 	case "make":
-		runMake(os.Args[2:])
+		runMake(subArgs)
+
+	case "alloc":
+		runAlloc(subArgs)
 
 	default:
 		fmt.Printf("Error: unknown command '%s'\n", os.Args[1])

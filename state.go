@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+const PeerNameRegExp = `([A-Za-z][0-9A-Za-z-_]*)`
+
 func readState() *state {
 	if _, err := os.Stat(serverFileName); os.IsNotExist(err) {
 		fmt.Println("Error: cannot find", serverFileName, "in current directory")
@@ -28,7 +30,7 @@ func readState() *state {
 
 	cls := make(map[int]*client)
 
-	r := regexp.MustCompile(`^(\d+)-([0-9A-Za-z-_]+)\.toml$`)
+	r := regexp.MustCompile(`^(\d+)-` + PeerNameRegExp + `\.toml$`)
 
 	for _, f := range files {
 		if f.Name() == serverFileName {

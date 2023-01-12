@@ -53,13 +53,15 @@ func runInit(args []string) {
 		os.Exit(1)
 	}
 
+	serverHost := discoverIP()
+
 	ip4 := randomIP4()
 	fmt.Println("- Random IP4 private address: " + ip4)
 	fmt.Println("- Generating random unique local IPv6 unicast address")
 	ip6 := randomIP6()
 	fmt.Println("  " + ip6)
 
-	server := newServer(iface, ip4, ip6)
+	server := newServer(iface, ip4, ip6, serverHost)
 	err = server.save()
 	if err != nil {
 		fmt.Println("Error:", err)
