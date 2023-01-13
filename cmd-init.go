@@ -15,7 +15,7 @@ func runInit(args []string) {
 		fmt.Printf("Usage: %s %s <interface>\n", os.Args[0], os.Args[1])
 		fmt.Println("\t<interface> - wireguard interface name wg0, wg1, etc")
 		fmt.Println("")
-		fmt.Println(" The command will create directory <interface>-wg-dir-conf")
+		fmt.Println(" The command will create directory wdc-<interface>")
 		fmt.Println(" inside current working directory.")
 		fmt.Println("")
 		fmt.Println(" Subsequent commands must be run from that directory.")
@@ -28,7 +28,7 @@ func runInit(args []string) {
 	}
 	iface := args[0]
 
-	dir := iface + "-wg-dir-conf"
+	dir := "wdc-" + iface
 	if _, err := os.Stat(dir); err == nil {
 		fmt.Printf("Error: directory %s exists in cwd\n", dir)
 		fmt.Printf("       remove it, or choose other interface name\n")
@@ -62,10 +62,13 @@ func runInit(args []string) {
 	fmt.Println("  " + ip6)
 
 	server := newServer(iface, ip4, ip6, serverHost)
-	err = server.save()
+	err = server.writeOnce()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
+	fmt.Printf("- Config %s written successfuly to %s\n", serverFileName, dir)
+	fmt.Printf("  Feel free to inspect and change this file\n")
+	fmt.Printf("- Tip: cd to %s and run `%s alloc <peer-name>` to add peers\n", dir, os.Args[0])
 }
 
 func validateIfaceArg(iface string) bool {
@@ -78,8 +81,8 @@ func randomIP4() string {
 }
 
 func randomIP6() string {
-	// I don't think that RFC 4193 with SHA1 and machine id is relevant now, let's just read
-	// cryptographically random bytes
+	// I don't think that RFC 4193 with SHA1 and machine id is relevant,
+	// so let's just read cryptographically random bytes
 	b := make([]byte, 5)
 	if _, err := rand.Read(b); err != nil {
 		panic("failed to read 5 random bytes for IP6" + err.Error())

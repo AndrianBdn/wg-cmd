@@ -14,7 +14,7 @@ func runAlloc(args []string) {
 		fmt.Println("")
 		fmt.Println(dedent.Dedent(`
 			The command will find unused IP address, generate keys for client (peer)
-			and save peers wg-dir-conf config in file <ip_num>-<peer_name>.toml
+			and writeOnce peers wg-dir-conf config in file <ip_num>-<peer_name>.toml
 			`))
 		os.Exit(1)
 	}
@@ -28,6 +28,15 @@ func runAlloc(args []string) {
 	}
 
 	state := readState()
+
+	for _, excl := range state.clients {
+		if excl.name == peerName {
+			fmt.Println("Error: peer name", "'"+peerName+"'", "is already used by", excl.fileName)
+			fmt.Println(excl.allowedIps(state.server))
+			os.Exit(1)
+		}
+	}
+
 	foundIP := -1
 	for i := 2; i < 255; i++ {
 		if _, ok := state.clients[i]; !ok {
@@ -48,6 +57,9 @@ func runAlloc(args []string) {
 	}
 
 	fmt.Printf("- Config %s written successfuly\n", c.fileName)
-
-	_ = generateClientConfig(state.server, c, os.Stdout)
+	fmt.Println("- Warning: we saved client's PrivateKey in a config. This is useful.")
+	fmt.Println("           You can still remove it from from", c.fileName, "after printing client config.\n"+
+		"           (replace PrivateKey string value with \"redacted\")")
+	fmt.Printf("- Tip: run `%s print %d` to print config to console\n", os.Args[0], c.ipNum)
+	fmt.Printf("       run `%s print --qr %d` to print QR code\n", os.Args[0], c.ipNum)
 }

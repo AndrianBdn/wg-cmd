@@ -9,10 +9,15 @@ import (
 
 const PeerNameRegExp = `([A-Za-z][0-9A-Za-z-_]*)`
 
+type state struct {
+	server  *server
+	clients map[int]*client
+}
+
 func readState() *state {
 	if _, err := os.Stat(serverFileName); os.IsNotExist(err) {
 		fmt.Println("Error: cannot find", serverFileName, "in current directory")
-		fmt.Println("       cd to wg<num>-wg-dir-config first")
+		fmt.Println("       cd wdc-wg<num> first")
 		os.Exit(1)
 	}
 
@@ -47,9 +52,14 @@ func readState() *state {
 		if err != nil {
 			panic("unlikely logical error - number from regexp cannot be parsed")
 		}
+		if ip > 254 {
+			fmt.Println("Error: at the moment wg-dir-conf only supports 253 peers")
+			os.Exit(1)
+		}
 		if _, ok := cls[ip]; ok {
 			fmt.Println("Error: there are at least two conflicting files with the same IP number")
 			fmt.Println("      ", cls[ip], "and", cls[ip].fileName)
+			os.Exit(1)
 		}
 
 		name := m[0][2]

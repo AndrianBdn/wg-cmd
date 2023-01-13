@@ -38,6 +38,9 @@ func main() {
 	case "alloc":
 		runAlloc(subArgs)
 
+	case "print":
+		runPrint(subArgs)
+
 	default:
 		fmt.Printf("Error: unknown command '%s'\n", os.Args[1])
 	}
