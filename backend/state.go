@@ -49,8 +49,8 @@ func ReadState(wlog *log.Logger) (*State, error) {
 		if err != nil {
 			panic("unlikely logical error - number from regexp cannot be parsed")
 		}
-		if ip > 254 {
-			return nil, fmt.Errorf("at the moment wg-dir-conf only supports 253 peers")
+		if ip > 4094 {
+			return nil, fmt.Errorf("at the moment wg-dir-conf only supports 4094 peers (/20 subnet)")
 		}
 		if _, ok := cls[ip]; ok {
 			return nil, fmt.Errorf("conflicting files %s and %s", f.Name(), cls[ip].fileName)

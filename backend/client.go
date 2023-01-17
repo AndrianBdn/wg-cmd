@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"github.com/BurntSushi/toml"
@@ -62,15 +63,17 @@ func (c *Client) WriteOnce() error {
 func (c *Client) AllowedIps(srv *Server) string {
 	result := ""
 	if srv.Address4 != "" {
-		result += srv.addrInfo4.prefix + strconv.Itoa(c.ipNum) + "/32"
+		cAdd := c.ipNum / 256
+		d := c.ipNum % 256
+		result += srv.addrInfo4.prefix + strconv.Itoa(int(srv.addrInfo4.c)+cAdd) + "." + strconv.Itoa(d) + "/32"
 	}
 	if srv.Address6 != "" {
 		if result != "" {
 			result += ", "
 		}
-		var lb [1]byte
-		lb[0] = byte(c.ipNum)
-		result += srv.addrInfo6.prefix + hex.EncodeToString(lb[:]) + "/128"
+		b := make([]byte, 2)
+		binary.BigEndian.PutUint16(b, uint16(c.ipNum))
+		result += srv.addrInfo6.prefix + hex.EncodeToString(b) + "/128"
 	}
 	return result
 }

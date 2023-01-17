@@ -35,6 +35,7 @@ type Server struct {
 
 type addressInfo4 struct {
 	prefix string
+	c      uint8
 }
 
 type addressInfo6 struct {
@@ -88,16 +89,15 @@ func ReadServer() (*Server, error) {
 			return nil, fmt.Errorf("address4 must contain IP4 address")
 		}
 		ones, _ := ipNet.Mask.Size()
-		if ones != 24 {
+		if ones != 20 {
 			return nil, fmt.Errorf("address4 supports only /24 network")
 		}
 		if ip4[3] != 1 {
 			return nil, fmt.Errorf("address4 Server IP must start with 1")
 		}
 		prefix := strconv.Itoa(int(ip4[0])) + "." +
-			strconv.Itoa(int(ip4[1])) + "." +
-			strconv.Itoa(int(ip4[2])) + "."
-		s.addrInfo4 = &addressInfo4{prefix: prefix}
+			strconv.Itoa(int(ip4[1])) + "."
+		s.addrInfo4 = &addressInfo4{prefix: prefix, c: ip4[2]}
 	}
 
 	if s.Address6 != "" {

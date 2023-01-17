@@ -29,9 +29,9 @@ func runAlloc(args []string) {
 	}
 
 	fmt.Printf("- Config %s written successfuly\n", c.GetFileName())
-	fmt.Println("- Warning: we saved client's PrivateKey in a config. This is useful.")
-	fmt.Println("           You can still remove it from from", c.GetFileName(), "after printing client config.")
-	fmt.Println("           (replace PrivateKey string value with \"redacted\")")
+	fmt.Println("- Notice: we saved client's PrivateKey in a config. This is useful.")
+	fmt.Println("          You can still remove it from from", c.GetFileName(), "after printing client config.")
+	fmt.Println("          (replace PrivateKey string value with \"redacted\")")
 	fmt.Printf("- Tip: run `%s print %d` to print config to console\n", os.Args[0], c.GetIPNumber())
 	fmt.Printf("       run `%s print --qr %d` to print QR code\n", os.Args[0], c.GetIPNumber())
 }
