@@ -1,9 +1,8 @@
-package main
+package backend
 
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/lithammer/dedent"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
 	"os"
@@ -11,9 +10,9 @@ import (
 	"strings"
 )
 
-const serverFileName = "001-server.toml"
+const ServerFileName = `001-server.toml`
 
-type server struct {
+type Server struct {
 	Interface                 string
 	ServerConfigPath          string
 	Address4                  string
@@ -42,10 +41,10 @@ type addressInfo6 struct {
 	prefix string
 }
 
-func newServer(iface string, addr4 string, addr6 string, serverHost string) *server {
-	s := server{}
-	s.Address4 = addr4
-	s.Address6 = addr6
+func NewServer(iface string, serverHost string) *Server {
+	s := Server{}
+	s.Address4 = randomIP4()
+	s.Address6 = randomIP6()
 	s.Interface = iface
 	s.ServerConfigPath = "/etc/wireguard/" + iface + ".conf"
 	s.ListenPort = 51820
@@ -72,11 +71,11 @@ func newServer(iface string, addr4 string, addr6 string, serverHost string) *ser
 	return &s
 }
 
-func readServer() (*server, error) {
-	var s server
-	_, err := toml.DecodeFile(serverFileName, &s)
+func ReadServer() (*Server, error) {
+	var s Server
+	_, err := toml.DecodeFile(ServerFileName, &s)
 	if err != nil {
-		return nil, fmt.Errorf("readServer error %w", err)
+		return nil, fmt.Errorf("ReadServer error %w", err)
 	}
 
 	if s.Address4 != "" {
@@ -93,7 +92,7 @@ func readServer() (*server, error) {
 			return nil, fmt.Errorf("address4 supports only /24 network")
 		}
 		if ip4[3] != 1 {
-			return nil, fmt.Errorf("address4 server IP must start with 1")
+			return nil, fmt.Errorf("address4 Server IP must start with 1")
 		}
 		prefix := strconv.Itoa(int(ip4[0])) + "." +
 			strconv.Itoa(int(ip4[1])) + "." +
@@ -115,7 +114,7 @@ func readServer() (*server, error) {
 			return nil, fmt.Errorf("address6 only /64 CIDR supported")
 		}
 		if ip[15] != 1 {
-			return nil, fmt.Errorf("address6 server IP must start with 1")
+			return nil, fmt.Errorf("address6 Server IP must start with 1")
 		}
 		ip6parts := strings.SplitAfter(s.Address6, "::")
 		if len(ip6parts) != 2 {
@@ -127,29 +126,20 @@ func readServer() (*server, error) {
 	return &s, nil
 }
 
-func (s *server) writeOnce() error {
-	f, err := os.OpenFile(serverFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+func (s *Server) WriteOnce() error {
+	f, err := os.OpenFile(ServerFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	writeConfigHeader(f)
 	if err != nil {
-		return fmt.Errorf("server.writeOnce, can't create %s file %w", serverFileName, err)
+		return fmt.Errorf("Server.WriteOnce, can't create %s file %w", ServerFileName, err)
 	}
 
 	if err := toml.NewEncoder(f).Encode(s); err != nil {
-		return fmt.Errorf("server.writeOnce, error TOML encoding server struct %w", err)
+		return fmt.Errorf("Server.WriteOnce, error TOML encoding Server struct %w", err)
 	}
 
 	if err := f.Close(); err != nil {
-		return fmt.Errorf("server.writeOnce, can't close %s file %w", serverFileName, err)
+		return fmt.Errorf("Server.WriteOnce, can't close %s file %w", ServerFileName, err)
 	}
 
 	return nil
-}
-
-func writeConfigHeader(f *os.File) {
-	_, _ = f.WriteString(strings.TrimLeft(dedent.Dedent(`
-				# Warning: this is not a Wireguard config
-				# This file uses TOML (toml.io) syntax, instead of Wireguard 
-				# wg-dir-conf tool builds Wireguard config using files in this directory
-				# >> You are welcome to edit this file, it wont be overwritten.
-				`), "\n"))
 }

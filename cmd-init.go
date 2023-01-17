@@ -1,13 +1,10 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
-	mrand "math/rand"
+	"github.com/andrianbdn/wg-dir-conf/backend"
 	"os"
 	"regexp"
-	"strconv"
 )
 
 func runInit(args []string) {
@@ -55,38 +52,18 @@ func runInit(args []string) {
 
 	serverHost := discoverIP()
 
-	ip4 := randomIP4()
-	fmt.Println("- Random IP4 private address: " + ip4)
-	fmt.Println("- Generating random unique local IPv6 unicast address")
-	ip6 := randomIP6()
-	fmt.Println("  " + ip6)
-
-	server := newServer(iface, ip4, ip6, serverHost)
-	err = server.writeOnce()
+	server := backend.NewServer(iface, serverHost)
+	err = server.WriteOnce()
 	if err != nil {
 		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
-	fmt.Printf("- Config %s written successfuly to %s\n", serverFileName, dir)
+	fmt.Printf("- Config %s written successfuly to %s\n", backend.ServerFileName, dir)
 	fmt.Printf("  Feel free to inspect and change this file\n")
 	fmt.Printf("- Tip: cd to %s and run `%s alloc <peer-name>` to add peers\n", dir, os.Args[0])
 }
 
 func validateIfaceArg(iface string) bool {
-	// does anybody need interfaces not starting with wg? more than wg9999?
+	// does anybody need interfaces not starting with wg? - more than wg9999?
 	return regexp.MustCompile(`^wg\d{1,4}$`).MatchString(iface)
-}
-
-func randomIP4() string {
-	return "10." + strconv.Itoa(mrand.Intn(256)) + "." + strconv.Itoa(mrand.Intn(256)) + ".1/24"
-}
-
-func randomIP6() string {
-	// I don't think that RFC 4193 with SHA1 and machine id is relevant,
-	// so let's just read cryptographically random bytes
-	b := make([]byte, 5)
-	if _, err := rand.Read(b); err != nil {
-		panic("failed to read 5 random bytes for IP6" + err.Error())
-	}
-	bhex := hex.EncodeToString(b)
-	return "fd" + bhex[0:2] + ":" + bhex[2:6] + ":" + bhex[6:10] + "::1/64"
 }

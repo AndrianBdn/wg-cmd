@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"encoding/hex"
@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-type client struct {
+type Client struct {
 	ipNum      int
 	name       string
 	fileName   string
@@ -17,11 +17,11 @@ type client struct {
 	PrivateKey string
 }
 
-func readClient(fileName string, ipNum int, name string) (*client, error) {
-	var c client
+func ReadClient(fileName string, ipNum int, name string) (*Client, error) {
+	var c Client
 	_, err := toml.DecodeFile(fileName, &c)
 	if err != nil {
-		return nil, fmt.Errorf("readClient error %w", err)
+		return nil, fmt.Errorf("ReadClient error %w", err)
 	}
 	c.fileName = fileName
 	c.ipNum = ipNum
@@ -29,9 +29,9 @@ func readClient(fileName string, ipNum int, name string) (*client, error) {
 	return &c, nil
 }
 
-func newClient(ip int, name string) *client {
+func NewClient(ip int, name string) *Client {
 	fileName := fmt.Sprintf("%03d-%s.toml", ip, name)
-	c := client{ipNum: ip, name: name, fileName: fileName}
+	c := Client{ipNum: ip, name: name, fileName: fileName}
 	key, err := wgtypes.GeneratePrivateKey()
 	if err != nil {
 		panic("Can't generate wireguard keypair, err: " + err.Error())
@@ -41,25 +41,25 @@ func newClient(ip int, name string) *client {
 	return &c
 }
 
-func (c *client) writeOnce() error {
+func (c *Client) WriteOnce() error {
 	f, err := os.OpenFile(c.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	writeConfigHeader(f)
 	if err != nil {
-		return fmt.Errorf("client.writeOnce, can't create %s file %w", c.fileName, err)
+		return fmt.Errorf("Client.WriteOnce, can't create %s file %w", c.fileName, err)
 	}
 
 	if err := toml.NewEncoder(f).Encode(c); err != nil {
-		return fmt.Errorf("client.writeOnce, error TOML encoding server struct %w", err)
+		return fmt.Errorf("Client.WriteOnce, error TOML encoding Server struct %w", err)
 	}
 
 	if err := f.Close(); err != nil {
-		return fmt.Errorf("client.writeOnce, can't close %s file %w", c.fileName, err)
+		return fmt.Errorf("Client.WriteOnce, can't close %s file %w", c.fileName, err)
 	}
 
 	return nil
 }
 
-func (c *client) allowedIps(srv *server) string {
+func (c *Client) AllowedIps(srv *Server) string {
 	result := ""
 	if srv.Address4 != "" {
 		result += srv.addrInfo4.prefix + strconv.Itoa(c.ipNum) + "/32"
@@ -73,4 +73,16 @@ func (c *client) allowedIps(srv *server) string {
 		result += srv.addrInfo6.prefix + hex.EncodeToString(lb[:]) + "/128"
 	}
 	return result
+}
+
+func (c *Client) GetName() string {
+	return c.name
+}
+
+func (c *Client) GetFileName() string {
+	return c.fileName
+}
+
+func (c *Client) GetIPNumber() int {
+	return c.ipNum
 }
