@@ -13,7 +13,7 @@ func OpAlloc(peerName string, wlog *log.Logger) (*backend.Client, error) {
 		return nil, fmt.Errorf("<peer_name> must start with letter, contain only letters, numbers, underscore, dash")
 	}
 
-	state, err := backend.ReadState(wlog)
+	state, err := backend.ReadState(".", wlog)
 	if err != nil {
 		return nil, err
 	}

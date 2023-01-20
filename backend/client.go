@@ -7,6 +7,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -18,9 +19,9 @@ type Client struct {
 	PrivateKey string
 }
 
-func ReadClient(fileName string, ipNum int, name string) (*Client, error) {
+func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, error) {
 	var c Client
-	_, err := toml.DecodeFile(fileName, &c)
+	_, err := toml.DecodeFile(filepath.Join(dir, fileName), &c)
 	if err != nil {
 		return nil, fmt.Errorf("ReadClient error %w", err)
 	}

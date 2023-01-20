@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 )
@@ -15,14 +16,14 @@ type State struct {
 	Clients map[int]*Client
 }
 
-func ReadState(wlog *log.Logger) (*State, error) {
-	if _, err := os.Stat(ServerFileName); os.IsNotExist(err) {
-		return nil, fmt.Errorf("cannot find %s in current directory", ServerFileName)
+func ReadState(dir string, wlog *log.Logger) (*State, error) {
+	if _, err := os.Stat(filepath.Join(dir, ServerFileName)); os.IsNotExist(err) {
+		return nil, fmt.Errorf("cannot find %s in wgcmd interface directory %s", ServerFileName, dir)
 	}
 
-	files, err := os.ReadDir("./")
+	files, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("unable to list files in current directory: %w", err)
+		return nil, fmt.Errorf("unable to list files in %s directory: %w", dir, err)
 	}
 
 	srv, err := ReadServer()
@@ -58,7 +59,7 @@ func ReadState(wlog *log.Logger) (*State, error) {
 
 		name := m[0][2]
 
-		client, err := ReadClient(f.Name(), ip, name)
+		client, err := ReadClient(dir, f.Name(), ip, name)
 		if err != nil {
 			return nil, fmt.Errorf("cannot read file %s error %w", f.Name(), err)
 		}

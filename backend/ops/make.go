@@ -9,7 +9,7 @@ import (
 )
 
 func OpMake(wlog *log.Logger) (*backend.Server, error) {
-	state, err := backend.ReadState(wlog)
+	state, err := backend.ReadState(".", wlog)
 	if err != nil {
 		return nil, err
 	}

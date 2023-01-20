@@ -18,7 +18,7 @@ func printUsageAndQuit() {
 	os.Exit(1)
 }
 
-func main() {
+func cliMain() {
 	rand.Seed(time.Now().UnixNano())
 	syscall.Umask(0000)
 

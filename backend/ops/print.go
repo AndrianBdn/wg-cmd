@@ -13,7 +13,7 @@ import (
 )
 
 func OpPrint(arg string, qr bool, wlog *log.Logger) (string, error) {
-	st, err := backend.ReadState(wlog)
+	st, err := backend.ReadState(".", wlog)
 	if err != nil {
 		return "", err
 	}
