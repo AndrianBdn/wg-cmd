@@ -1,4 +1,4 @@
-package main
+package app
 
 type Settings struct {
 	WireguardDir     string
@@ -6,7 +6,7 @@ type Settings struct {
 	DefaultInterface string
 }
 
-func readSettings() *Settings {
+func ReadSettings() *Settings {
 	s := Settings{
 		WireguardDir:     "/etc/wireguard",
 		DatabaseDir:      ".",

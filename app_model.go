@@ -1,52 +1,55 @@
 package main
 
 import (
+	"github.com/andrianbdn/wg-dir-conf/app"
+	"github.com/andrianbdn/wg-dir-conf/wizard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type AppModel struct {
-	app    *App
-	value  string
-	dialog tea.Model
+	app    *app.App
+	wizard tea.Model
 }
 
-func NewAppModel(app *App) AppModel {
+func NewAppModel(app *app.App) AppModel {
 	a := AppModel{app: app}
-	a.value = "Hi there"
+	a.wizard = wizard.NewRootModel(app)
 	return a
 }
 
 func (a AppModel) Init() tea.Cmd {
+	if a.wizard != nil {
+		return a.wizard.Init()
+	}
 	return nil
 }
 
 func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	//if msg, ok := msg.(WizardResult); ok {
+	//	//
+	//	fmt.Println(msg)
+	//	return a, nil
+	//}
 
-	if msg, ok := msg.(WizardResult); ok {
-		a.dialog = nil
-		a.value = string(msg)
-		return a, nil
-	}
-
-	if a.dialog != nil {
-		dialog, cmd := a.dialog.Update(msg)
-		a.dialog = dialog
-		return a, cmd
+	if a.wizard != nil {
+		w, c := a.wizard.Update(msg)
+		a.wizard = w
+		return a, c
 	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 
-		case "q", "ctrl+c", "f10":
-			return a, tea.Quit
+		//case "q", "ctrl+c", "f10":
+		//	return a, tea.Quit
 
-		case "enter":
-			w := NewWizard()
-			cmd := w.Init()
-			a.dialog = &w
-			return a, cmd
+		//case "enter":
+		//	w := NewWizard()
+		//	cmd := w.Init()
+		//	a.dialog = &w
+		//	return a, cmd
 		}
 
 	}
@@ -54,10 +57,10 @@ func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (a AppModel) View() string {
-	if a.dialog != nil {
-		return a.dialog.View()
+	if a.wizard != nil {
+		return a.wizard.View()
 	}
 
 	style := lipgloss.NewStyle().Background(lipgloss.Color("10")).Foreground(lipgloss.Color("15"))
-	return style.Render(a.value)
+	return style.Render("Hello World")
 }

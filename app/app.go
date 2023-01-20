@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 type App struct {
@@ -19,7 +20,7 @@ type App struct {
 
 func NewApp() *App {
 	a := App{
-		Settings: readSettings(),
+		Settings: ReadSettings(),
 		logger:   log.New(os.Stderr, "", 0),
 	}
 
@@ -35,11 +36,14 @@ func NewApp() *App {
 	return &a
 }
 
-func main() {
-	a := NewApp()
-	m := NewAppModel(a)
-	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+func (app *App) ValidateIfaceArg(ifName string) string {
+	if !regexp.MustCompile(`^wg\d{1,4}$`).MatchString(ifName) {
+		return "Interface name should be in form wg<number>"
 	}
+
+	p := filepath.Join(app.Settings.WireguardDir, ifName+".conf")
+	if _, err := os.Stat(p); err == nil {
+		return fmt.Sprintf("Found existing config for %s at %s. Try a different name.", ifName, app.Settings.WireguardDir)
+	}
+	return ""
 }
