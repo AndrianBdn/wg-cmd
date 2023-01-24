@@ -11,9 +11,10 @@ import (
 type ResultStep2 string
 
 type Step2 struct {
-	app     *app.App
-	sSize   tea.WindowSizeMsg
-	spinner spinner.Model
+	app       *app.App
+	sSize     tea.WindowSizeMsg
+	spinner   spinner.Model
+	spinnerOn bool
 }
 
 func NewStep2(app *app.App, sSize tea.WindowSizeMsg) Step2 {
@@ -49,16 +50,17 @@ func (m Step2) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	default:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
+		if m.spinnerOn {
+			var cmd tea.Cmd
+			m.spinner, cmd = m.spinner.Update(msg)
+			return m, cmd
+		}
 	}
 
 	return m, cmd
 }
 
 func (m Step2) View() string {
-
 	s := newStyleSize(m.sSize)
 
 	top := lipgloss.JoinVertical(0,

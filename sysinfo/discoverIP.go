@@ -1,4 +1,4 @@
-package main
+package sysinfo
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 var ipDiscoveryServices = []string{"https://ip4only.me/api/", "https://api.ipify.org/", "https://ifconfig.co/ip"}
 
-func discoverIP() string {
+func DiscoverIP() string {
 	for _, service := range ipDiscoveryServices {
 		fmt.Printf("- Using %s to determine our IP\n", service)
 		strIP, err := getMyIPWithService(service)

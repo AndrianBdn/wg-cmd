@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-dir-conf/sysinfo"
 	"os"
 	"regexp"
 )
@@ -50,7 +51,7 @@ func runInit(args []string) {
 		os.Exit(1)
 	}
 
-	serverHost := discoverIP()
+	serverHost := sysinfo.DiscoverIP()
 
 	server := backend.NewServer(iface, serverHost)
 	err = server.WriteOnce()

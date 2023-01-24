@@ -39,9 +39,21 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if msg, ok := msg.(ifNameMsg); ok {
 		m.result.ifName = string(msg)
-		step2 := NewStep2(m.app, m.sSize)
-		m.currentModel = step2
-		return m, step2.Init()
+		//step2 := NewStep2(m.app, m.sSize)
+
+		//opts := []opt{
+		//	{"nat", "Use NAT to provide the Internet access to the VPN"},
+		//	{"no", "Skip NAT, only setup basic networking"},
+		//}
+		//optStep := newGenericOption(m.app, m.sSize, "nat", opts)
+		//optStep.setPrompt("Choose if the Setup should configure Network Address Translation (NAT) for the VPN network")
+		//
+		//m.currentModel = optStep
+		//return m, optStep.Init()
+
+		portStep := newPortScreen(m.sSize)
+		m.currentModel = portStep
+		return m, portStep.Init()
 	}
 
 	if m.currentModel != nil {

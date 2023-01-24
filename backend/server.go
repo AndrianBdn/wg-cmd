@@ -12,6 +12,16 @@ import (
 
 const ServerFileName = `001-server.toml`
 
+type NewServerBlueprint struct {
+	WireguardDir string
+	NetworkIP4   string
+	NetworkIP6   string
+	UseNAT       bool
+	UseIP6       bool
+	DNS          string
+	Port         uint16
+}
+
 type Server struct {
 	Interface                 string
 	ServerConfigPath          string
@@ -27,7 +37,7 @@ type Server struct {
 	PostDown6                 string
 	ClientRoute               string
 	ClientDNS                 string
-	ServerHost                string
+	ClientServerEndpoint      string
 	ClientPersistentKeepalive int
 	addrInfo4                 *addressInfo4
 	addrInfo6                 *addressInfo6
@@ -44,8 +54,8 @@ type addressInfo6 struct {
 
 func NewServer(iface string, serverHost string) *Server {
 	s := Server{}
-	s.Address4 = randomIP4()
-	s.Address6 = randomIP6()
+	s.Address4 = netToServerIP4(RandomIP4())
+	s.Address6 = netToServerIP6(RandomIP6())
 	s.Interface = iface
 	s.ServerConfigPath = "/etc/wireguard/" + iface + ".conf"
 	s.ListenPort = 51820
@@ -67,7 +77,7 @@ func NewServer(iface string, serverHost string) *Server {
 	s.PostDown6 = "ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
 	s.ClientRoute = "0.0.0.0/0, ::/0"
 	s.ClientDNS = "1.1.1.1"
-	s.ServerHost = serverHost
+	s.ClientServerEndpoint = serverHost
 	s.ClientPersistentKeepalive = 42
 	return &s
 }

@@ -91,7 +91,7 @@ func GenerateClientConfig(server *Server, client *Client, w io.Writer) error {
 	}
 	_, _ = fmt.Fprintln(w, "PublicKey =", server.PublicKey)
 	_, _ = fmt.Fprintln(w, "AllowedIPs =", server.ClientRoute)
-	_, _ = fmt.Fprintln(w, "Endpoint =", server.ServerHost+":"+strconv.Itoa(int(server.ListenPort)))
+	_, _ = fmt.Fprintln(w, "Endpoint =", server.ClientServerEndpoint+":"+strconv.Itoa(int(server.ListenPort)))
 
 	if server.ClientPersistentKeepalive != 0 {
 		_, _ = fmt.Fprintln(w, "PersistentKeepalive =", server.ClientPersistentKeepalive)
