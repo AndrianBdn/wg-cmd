@@ -86,7 +86,6 @@ func (m optionScreenStep) View() string {
 
 	top := lipgloss.JoinVertical(0,
 		s.header(),
-		s.xText.Render(""),
 		s.xText.Render(m.prompt),
 		s.xText.Render("\nUse the UP and DOWN ARROW keys to select the option you want, "+
 			"and then press ENTER to continue.\n"),

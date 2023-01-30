@@ -10,14 +10,14 @@ import (
 
 type ifNameMsg string
 
-type StepInterfaceName struct {
+type stepInterfaceName struct {
 	app         *app.App
 	ifName      textinput.Model
 	ifNameError string
 	sSize       tea.WindowSizeMsg
 }
 
-func NewStepInterfaceName(app *app.App) StepInterfaceName {
+func NewStepInterfaceName(app *app.App) stepInterfaceName {
 	ti := textinput.New()
 	ti.Placeholder = "wg0  "
 	ti.Focus()
@@ -28,17 +28,17 @@ func NewStepInterfaceName(app *app.App) StepInterfaceName {
 	ti.CursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
 	ti.Prompt = ""
 
-	return StepInterfaceName{
+	return stepInterfaceName{
 		app:    app,
 		ifName: ti,
 	}
 }
 
-func (m StepInterfaceName) Init() tea.Cmd {
+func (m stepInterfaceName) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m StepInterfaceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m stepInterfaceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -68,7 +68,7 @@ func (m StepInterfaceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m StepInterfaceName) View() string {
+func (m stepInterfaceName) View() string {
 	s := newStyleSize(m.sSize)
 
 	p := lipgloss.JoinHorizontal(0,
@@ -88,7 +88,6 @@ func (m StepInterfaceName) View() string {
 
 	top := lipgloss.JoinVertical(0,
 		s.header(),
-		s.xText.Render(""),
 		s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Welcome to Setup.")),
 		s.xText.Render(""),
 		s.xText.Render("This portion of the Setup helps you configure a new WireGuard(R) network interface."),

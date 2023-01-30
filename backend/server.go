@@ -54,7 +54,7 @@ type addressInfo6 struct {
 
 func NewServer(iface string, serverHost string) *Server {
 	s := Server{}
-	s.Address4 = netToServerIP4(RandomIP4())
+	s.Address4 = netToServerIP4(RandomIP4(""))
 	s.Address6 = netToServerIP6(RandomIP6())
 	s.Interface = iface
 	s.ServerConfigPath = "/etc/wireguard/" + iface + ".conf"

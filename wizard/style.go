@@ -31,5 +31,6 @@ func (s *style) header() string {
 	return lipgloss.JoinVertical(0,
 		s.xStyleBase.Render(" WG Commander Setup"),
 		s.xStyleBase.Render("====================="),
+		s.xText.Render(""),
 	)
 }

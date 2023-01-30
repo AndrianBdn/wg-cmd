@@ -10,9 +10,52 @@ import (
 	"time"
 )
 
-var ipDiscoveryServices = []string{"https://ip4only.me/api/", "https://api.ipify.org/", "https://ifconfig.co/ip"}
+var ipDiscoveryServices = []string{"https://ip4only.me/api/", "https://api.ipify.org/", "https://ifconfig.co/ip", ""}
 
-func DiscoverIP() string {
+type DiscoverStep struct {
+	Result  string
+	step    int
+	Service string
+	Log     string
+}
+
+func NewDiscoverIPStep() DiscoverStep {
+	return DiscoverStep{
+		step:    0,
+		Service: ipDiscoveryServices[0],
+	}
+}
+
+func DiscoverIP(d DiscoverStep) DiscoverStep {
+	if d.Result != "" {
+		return d
+	}
+	for idx, service := range ipDiscoveryServices {
+		if idx < d.step {
+			continue
+		}
+		if service == "" {
+			// fallback
+			d.Service = ""
+			d.Result = "127.0.0.1"
+			return d
+		}
+
+		strIP, err := getMyIPWithService(service)
+		if err != nil {
+			d.step++
+			d.Service = ipDiscoveryServices[d.step]
+			d.Log = err.Error()
+			return d
+		}
+		d.Result = strIP
+		return d
+	}
+
+	return d
+}
+
+func DiscoverIPOld() string {
 	for _, service := range ipDiscoveryServices {
 		fmt.Printf("- Using %s to determine our IP\n", service)
 		strIP, err := getMyIPWithService(service)

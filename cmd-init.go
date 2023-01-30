@@ -51,7 +51,7 @@ func runInit(args []string) {
 		os.Exit(1)
 	}
 
-	serverHost := sysinfo.DiscoverIP()
+	serverHost := sysinfo.DiscoverIPOld()
 
 	server := backend.NewServer(iface, serverHost)
 	err = server.WriteOnce()

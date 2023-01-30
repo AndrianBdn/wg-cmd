@@ -8,6 +8,8 @@
 
 
 Wizard 
- - Interface name 
- - Use NAT y/n 
- - Use 
+ - Interface name
+ - Choose Port
+ - Network Screen
+ - Use NAT y/n  
+ - Choose DNS (if NAT - yes)

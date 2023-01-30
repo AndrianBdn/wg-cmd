@@ -99,7 +99,6 @@ func (m portScreenStep) View() string {
 
 	top := lipgloss.JoinVertical(0,
 		s.header(),
-		s.xText.Render(""),
 		s.xText.Render("Choose a UDP port for a WireGuard(R) VPN endpoint."),
 		s.xText.Render("\nUse the LEFT and RIGHT ARROW keys to increment or decrement port number. Hold SHIFT key"+
 			" while pressing the ARROW keys to change value faster. Hold CTRL+SHIFT to increase change speed further.\n"),

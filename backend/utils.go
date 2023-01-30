@@ -19,8 +19,20 @@ func writeConfigHeader(f *os.File) {
 				`), "\n"))
 }
 
-func RandomIP4() string {
-	return "10." + strconv.Itoa(mrand.Intn(256)) + "." + strconv.Itoa(mrand.Intn(16)*16) + ".0/20"
+func RandomIP4(A string) string {
+	ab := ""
+
+	if A == "100" {
+		ab = "100." + strconv.Itoa(64+mrand.Intn(64))
+	} else if A == "172" {
+		ab = "172." + strconv.Itoa(16+mrand.Intn(16))
+	} else if A == "192" {
+		ab = "192.168"
+	} else {
+		ab = "10." + strconv.Itoa(mrand.Intn(256))
+	}
+
+	return ab + "." + strconv.Itoa(mrand.Intn(16)*16) + ".0/20"
 }
 
 func RandomIP6() string {
