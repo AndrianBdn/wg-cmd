@@ -23,7 +23,7 @@ type Result struct {
 
 type RootModel struct {
 	app           *app.App
-	stepInterface stepInterfaceName
+	stepInterface interfaceScreenStep
 	currentModel  tea.Model
 	result        Result
 	sSize         tea.WindowSizeMsg
@@ -32,7 +32,7 @@ type RootModel struct {
 func NewRootModel(app *app.App) RootModel {
 	m := RootModel{}
 	m.app = app
-	m.currentModel = NewStepInterfaceName(app)
+	m.currentModel = newInterfaceScreenStep(app)
 	return m
 }
 
@@ -96,6 +96,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if msg.id == optIdDNS {
+			m.result.DNS = msg.result.id
 
 		}
 
@@ -123,8 +124,8 @@ func (m RootModel) presentNatDialog() (tea.Model, tea.Cmd) {
 		{"no", "Skip NAT, only setup basic networking"},
 	}
 
-	if sysinfo.DefaultIP6Interface() == "" {
-		// TODO: remove option nat46
+	if sysinfo.HasIP6() == false || m.result.Net6 == "" {
+		opts = opts[1:]
 	}
 
 	optStep := newGenericOption(m.app, m.sSize, optIdNAT, opts)

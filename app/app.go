@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-dir-conf/sysinfo"
 	tea "github.com/charmbracelet/bubbletea"
 	"log"
 	"os"
@@ -43,7 +44,18 @@ func (app *App) ValidateIfaceArg(ifName string) string {
 
 	p := filepath.Join(app.Settings.WireguardDir, ifName+".conf")
 	if _, err := os.Stat(p); err == nil {
-		return fmt.Sprintf("Found existing config for %s at %s. Try a different name.", ifName, app.Settings.WireguardDir)
+		return fmt.Sprintf("Found config for %s at %s. Try a different name.", ifName, app.Settings.WireguardDir)
 	}
+
+	d := "wgc-" + ifName
+	p = filepath.Join(app.Settings.DatabaseDir, d)
+	if _, err := os.Stat(p); err == nil {
+		return fmt.Sprintf("Found directory %s at %s. Try a different name.", d, app.Settings.WireguardDir)
+	}
+
+	if sysinfo.NetworkInterfaceExists(ifName) {
+		return fmt.Sprintf("Network interface exists in routing tables. Try a different name.")
+	}
+
 	return ""
 }

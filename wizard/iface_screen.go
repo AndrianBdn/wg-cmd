@@ -10,14 +10,14 @@ import (
 
 type ifNameMsg string
 
-type stepInterfaceName struct {
+type interfaceScreenStep struct {
 	app         *app.App
 	ifName      textinput.Model
 	ifNameError string
 	sSize       tea.WindowSizeMsg
 }
 
-func NewStepInterfaceName(app *app.App) stepInterfaceName {
+func newInterfaceScreenStep(app *app.App) interfaceScreenStep {
 	ti := textinput.New()
 	ti.Placeholder = "wg0  "
 	ti.Focus()
@@ -28,17 +28,17 @@ func NewStepInterfaceName(app *app.App) stepInterfaceName {
 	ti.CursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
 	ti.Prompt = ""
 
-	return stepInterfaceName{
+	return interfaceScreenStep{
 		app:    app,
 		ifName: ti,
 	}
 }
 
-func (m stepInterfaceName) Init() tea.Cmd {
+func (m interfaceScreenStep) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m stepInterfaceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m interfaceScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -68,7 +68,7 @@ func (m stepInterfaceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m stepInterfaceName) View() string {
+func (m interfaceScreenStep) View() string {
 	s := newStyleSize(m.sSize)
 
 	p := lipgloss.JoinHorizontal(0,

@@ -26,7 +26,7 @@ func runInit(args []string) {
 	}
 	iface := args[0]
 
-	dir := "wdc-" + iface
+	dir := "wgc-" + iface
 	if _, err := os.Stat(dir); err == nil {
 		fmt.Printf("Error: directory %s exists in cwd\n", dir)
 		fmt.Printf("       remove it, or choose other interface name\n")
