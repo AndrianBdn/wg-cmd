@@ -17,7 +17,7 @@ type opt struct {
 	value string
 }
 
-type optionScreenStep struct {
+type optionScreen struct {
 	app      *app.App
 	sSize    tea.WindowSizeMsg
 	id       string
@@ -26,8 +26,8 @@ type optionScreenStep struct {
 	selIndex int
 }
 
-func newGenericOption(app *app.App, sSize tea.WindowSizeMsg, id string, options []opt) optionScreenStep {
-	return optionScreenStep{
+func newOptionScreen(app *app.App, sSize tea.WindowSizeMsg, id string, options []opt) optionScreen {
+	return optionScreen{
 		app:   app,
 		sSize: sSize,
 		id:    id,
@@ -35,15 +35,15 @@ func newGenericOption(app *app.App, sSize tea.WindowSizeMsg, id string, options 
 	}
 }
 
-func (m *optionScreenStep) setPrompt(prompt string) {
+func (m *optionScreen) setPrompt(prompt string) {
 	m.prompt = prompt
 }
 
-func (m optionScreenStep) Init() tea.Cmd {
+func (m optionScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m optionScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m optionScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -81,7 +81,7 @@ func (m optionScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m optionScreenStep) View() string {
+func (m optionScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	top := lipgloss.JoinVertical(0,

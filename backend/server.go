@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/andrianbdn/wg-dir-conf/sysinfo"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
 	"os"
@@ -12,14 +13,15 @@ import (
 
 const ServerFileName = `001-server.toml`
 
-type NewServerBlueprint struct {
-	WireguardDir string
-	NetworkIP4   string
-	NetworkIP6   string
-	UseNAT       bool
-	UseIP6       bool
-	DNS          string
-	Port         uint16
+type ServerBlueprint struct {
+	InterfaceName string
+	Endpoint      string
+	Port          uint16
+	Nat4          bool
+	Nat6          bool
+	Net4          string
+	Net6          string
+	DNS           string
 }
 
 type Server struct {
@@ -52,13 +54,15 @@ type addressInfo6 struct {
 	prefix string
 }
 
-func NewServer(iface string, serverHost string) *Server {
+func NewServerWithBlueprint(b ServerBlueprint) *Server {
 	s := Server{}
-	s.Address4 = netToServerIP4(RandomIP4(""))
-	s.Address6 = netToServerIP6(RandomIP6())
-	s.Interface = iface
-	s.ServerConfigPath = "/etc/wireguard/" + iface + ".conf"
-	s.ListenPort = 51820
+	s.Address4 = netToServerIP4(b.Net4)
+	if b.Net6 != "" {
+		s.Address6 = netToServerIP6(b.Net6)
+	}
+	s.Interface = b.InterfaceName
+	s.ServerConfigPath = "/etc/wireguard/" + b.InterfaceName + ".conf"
+	s.ListenPort = b.Port
 	key, err := wgtypes.GenerateKey()
 	if err != nil {
 		panic("Can't generate wireguard pre-shared key, err: " + err.Error())
@@ -71,15 +75,54 @@ func NewServer(iface string, serverHost string) *Server {
 	}
 	s.PrivateKey = key.String()
 	s.PublicKey = key.PublicKey().String()
-	s.PostUp4 = "iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-	s.PostUp6 = "ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-	s.PostDown4 = "iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
-	s.PostDown6 = "ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
-	s.ClientRoute = "0.0.0.0/0, ::/0"
-	s.ClientDNS = "1.1.1.1"
-	s.ClientServerEndpoint = serverHost
+
+	if b.Nat4 {
+		s.PostUp4 = fmt.Sprintf("iptables -A FORWARD -i %s -j ACCEPT; "+
+			"iptables -t nat -A POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP4Interface())
+
+		s.PostDown4 = fmt.Sprintf("iptables -D FORWARD -i %s -j ACCEPT; "+
+			"iptables -t nat -D POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP4Interface())
+	}
+
+	if b.Nat6 {
+		s.PostUp6 = fmt.Sprintf("ip6tables -A FORWARD -i %s -j ACCEPT; "+
+			"ip6tables -t nat -A POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP6Interface())
+		s.PostDown6 = fmt.Sprintf("ip6tables -D FORWARD -i %s -j ACCEPT; "+
+			"ip6tables -t nat -D POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP6Interface())
+	}
+
+	if b.Nat4 {
+		s.ClientRoute = "0.0.0.0/0"
+	} else {
+		s.ClientRoute = b.Net4
+	}
+
+	if b.Net6 != "" {
+		s.ClientRoute += ", "
+		if b.Nat6 {
+			s.ClientRoute += "::/0"
+		} else {
+			s.ClientRoute += b.Net6
+		}
+	}
+
+	s.ClientDNS = b.DNS
+	s.ClientServerEndpoint = b.Endpoint
 	s.ClientPersistentKeepalive = 42
 	return &s
+}
+
+func NewServer(iface string, serverHost string) *Server {
+	b := ServerBlueprint{}
+	b.Net4 = RandomIP4("")
+	b.Net6 = RandomIP6()
+	b.InterfaceName = iface
+	b.Endpoint = serverHost
+	b.Port = 51820
+	b.Nat4 = true
+	b.Nat6 = true
+	b.DNS = "1.1.1.1"
+	return NewServerWithBlueprint(b)
 }
 
 func ReadServer() (*Server, error) {

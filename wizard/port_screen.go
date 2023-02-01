@@ -11,24 +11,24 @@ import (
 
 type portStepResult uint16
 
-type portScreenStep struct {
+type portScreen struct {
 	sSize  tea.WindowSizeMsg
 	port   uint16
 	errMsg string
 }
 
-func newPortScreen(sSize tea.WindowSizeMsg) portScreenStep {
-	return portScreenStep{
+func newPortScreen(sSize tea.WindowSizeMsg) portScreen {
+	return portScreen{
 		sSize: sSize,
 		port:  51820,
 	}
 }
 
-func (m portScreenStep) Init() tea.Cmd {
+func (m portScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m portScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m portScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -94,7 +94,7 @@ func (m portScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m portScreenStep) View() string {
+func (m portScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	top := lipgloss.JoinVertical(0,

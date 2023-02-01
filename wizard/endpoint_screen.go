@@ -17,7 +17,7 @@ const (
 	stateSuccess
 )
 
-type endpointScreenStep struct {
+type endpointScreen struct {
 	sSize   tea.WindowSizeMsg
 	state   int
 	spinner spinner.Model
@@ -25,21 +25,21 @@ type endpointScreenStep struct {
 	result  endpointStepResult
 }
 
-func newEndpointStep(sSize tea.WindowSizeMsg) endpointScreenStep {
+func newEndpointStep(sSize tea.WindowSizeMsg) endpointScreen {
 	s := spinner.New()
 	s.Spinner = spinner.Meter
-	return endpointScreenStep{
+	return endpointScreen{
 		sSize:   sSize,
 		spinner: s,
 		state:   stateInit,
 	}
 }
 
-func (m endpointScreenStep) Init() tea.Cmd {
+func (m endpointScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m endpointScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m endpointScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -97,7 +97,7 @@ func (m endpointScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m endpointScreenStep) View() string {
+func (m endpointScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	top := lipgloss.JoinVertical(0,
@@ -137,7 +137,7 @@ func (m endpointScreenStep) View() string {
 	return lipgloss.JoinVertical(0, top, bottom)
 }
 
-func (m endpointScreenStep) appendLogs(status, result string) string {
+func (m endpointScreen) appendLogs(status, result string) string {
 	if result != "" {
 		m.logs = strings.TrimRight(m.logs, " .\n")
 		m.logs = m.logs + " ... " + result + "\n"

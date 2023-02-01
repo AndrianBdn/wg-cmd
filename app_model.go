@@ -10,6 +10,8 @@ import (
 type AppModel struct {
 	app    *app.App
 	wizard tea.Model
+	sSize  tea.WindowSizeMsg
+	iface  string
 }
 
 func NewAppModel(app *app.App) AppModel {
@@ -26,11 +28,15 @@ func (a AppModel) Init() tea.Cmd {
 }
 
 func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	//if msg, ok := msg.(WizardResult); ok {
-	//	//
-	//	fmt.Println(msg)
-	//	return a, nil
-	//}
+	if msg, ok := msg.(tea.WindowSizeMsg); ok {
+		a.sSize = msg
+	}
+
+	if msg, ok := msg.(wizard.Done); ok {
+		a.wizard = nil
+		a.iface = msg.InterfaceName
+		return a, nil
+	}
 
 	if a.wizard != nil {
 		w, c := a.wizard.Update(msg)
@@ -40,16 +46,10 @@ func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
+		switch msg.Type {
 
-		//case "q", "ctrl+c", "f10":
-		//	return a, tea.Quit
-
-		//case "enter":
-		//	w := NewWizard()
-		//	cmd := w.Init()
-		//	a.dialog = &w
-		//	return a, cmd
+		case tea.KeyF3:
+			return a, tea.Quit
 		}
 
 	}
@@ -62,5 +62,5 @@ func (a AppModel) View() string {
 	}
 
 	style := lipgloss.NewStyle().Background(lipgloss.Color("10")).Foreground(lipgloss.Color("15"))
-	return style.Render("Hello World")
+	return style.Render("Hello World " + a.iface)
 }

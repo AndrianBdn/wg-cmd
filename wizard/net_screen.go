@@ -2,6 +2,7 @@ package wizard
 
 import (
 	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-dir-conf/sysinfo"
 	"github.com/andrianbdn/wg-dir-conf/tutils"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -12,26 +13,31 @@ type netStepResult struct {
 	net6 string
 }
 
-type netScreenStep struct {
+type netScreen struct {
 	sSize   tea.WindowSizeMsg
 	net6    string
 	net4    string
 	prefix4 int
 }
 
-func newNetScreenStep(sSize tea.WindowSizeMsg) netScreenStep {
-	return netScreenStep{
+func newNetScreen(sSize tea.WindowSizeMsg) netScreen {
+	n := netScreen{
 		sSize: sSize,
 		net4:  backend.RandomIP4("10"),
-		net6:  backend.RandomIP6(),
 	}
+
+	if sysinfo.HasIP6() {
+		n.net6 = backend.RandomIP6()
+	}
+
+	return n
 }
 
-func (m netScreenStep) Init() tea.Cmd {
+func (m netScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m netScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m netScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -77,7 +83,7 @@ func (m netScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m netScreenStep) View() string {
+func (m netScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	uiNet6 := m.net6
@@ -96,7 +102,8 @@ func (m netScreenStep) View() string {
 	)
 
 	bottom := lipgloss.JoinVertical(0,
-		s.xText.Render("Note: only /20 and /64 networks are supported at the moment. Make sure there is no collisions. \n"),
+		s.xText.Render("Note: only /20 and /64 networks are supported at the moment. "+
+			"Make sure there are no collisions. \n"),
 
 		s.xTooltip.Render("ENTER=Continue"),
 	)

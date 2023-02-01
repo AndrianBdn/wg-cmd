@@ -8,16 +8,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type ifNameMsg string
+type interfaceScreenResult string
 
-type interfaceScreenStep struct {
+type interfaceScreen struct {
 	app         *app.App
 	ifName      textinput.Model
 	ifNameError string
 	sSize       tea.WindowSizeMsg
 }
 
-func newInterfaceScreenStep(app *app.App) interfaceScreenStep {
+func newInterfaceScreen(app *app.App, sSize tea.WindowSizeMsg) interfaceScreen {
 	ti := textinput.New()
 	ti.Placeholder = "wg0  "
 	ti.Focus()
@@ -28,17 +28,18 @@ func newInterfaceScreenStep(app *app.App) interfaceScreenStep {
 	ti.CursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
 	ti.Prompt = ""
 
-	return interfaceScreenStep{
+	return interfaceScreen{
 		app:    app,
 		ifName: ti,
+		sSize:  sSize,
 	}
 }
 
-func (m interfaceScreenStep) Init() tea.Cmd {
+func (m interfaceScreen) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m interfaceScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m interfaceScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -58,7 +59,7 @@ func (m interfaceScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			return m, func() tea.Msg {
-				return ifNameMsg(m.ifName.Value())
+				return interfaceScreenResult(m.ifName.Value())
 			}
 		}
 
@@ -68,11 +69,11 @@ func (m interfaceScreenStep) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m interfaceScreenStep) View() string {
+func (m interfaceScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	p := lipgloss.JoinHorizontal(0,
-		s.xColor.Render("   Enter name of a WireGuard(R) network interface: "),
+		s.xColor.Render("   Enter name of a new WireGuard(R) network interface: "),
 		m.ifName.View(),
 	)
 
@@ -88,13 +89,9 @@ func (m interfaceScreenStep) View() string {
 
 	top := lipgloss.JoinVertical(0,
 		s.header(),
-		s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Welcome to Setup.")),
-		s.xText.Render(""),
 		s.xText.Render("This portion of the Setup helps you configure a new WireGuard(R) network interface."),
 		s.xText.Render(""),
 		s.xList.Render("•  To proceed, enter an interface name below and press ENTER"),
-		s.xText.Render(""),
-		s.xList.Render("•  To quit Setup without configuring the interface, press F3"),
 		s.xText.Render(""),
 		p,
 		errorBlock,
