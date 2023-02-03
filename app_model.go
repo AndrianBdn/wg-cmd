@@ -4,19 +4,24 @@ import (
 	"github.com/andrianbdn/wg-dir-conf/app"
 	"github.com/andrianbdn/wg-dir-conf/wizard"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type AppModel struct {
-	app    *app.App
-	wizard tea.Model
-	sSize  tea.WindowSizeMsg
-	iface  string
+	app        *app.App
+	wizard     tea.Model
+	mainScreen tea.Model
+	sSize      tea.WindowSizeMsg
 }
 
 func NewAppModel(app *app.App) AppModel {
 	a := AppModel{app: app}
-	a.wizard = wizard.NewRootModel(app)
+
+	if app.State == nil {
+		a.wizard = wizard.NewRootModel(app)
+	} else {
+		a.mainScreen = newMainScreenTable(app, a.sSize)
+	}
+
 	return a
 }
 
@@ -32,9 +37,9 @@ func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		a.sSize = msg
 	}
 
-	if msg, ok := msg.(wizard.Done); ok {
+	if _, ok := msg.(wizard.Done); ok {
 		a.wizard = nil
-		a.iface = msg.InterfaceName
+		a.mainScreen = newMainScreenTable(a.app, a.sSize)
 		return a, nil
 	}
 
@@ -44,15 +49,12 @@ func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return a, c
 	}
 
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
-
-		case tea.KeyF3:
-			return a, tea.Quit
-		}
-
+	if a.mainScreen != nil {
+		m, c := a.mainScreen.Update(msg)
+		a.mainScreen = m
+		return a, c
 	}
+
 	return a, nil
 }
 
@@ -60,7 +62,8 @@ func (a AppModel) View() string {
 	if a.wizard != nil {
 		return a.wizard.View()
 	}
-
-	style := lipgloss.NewStyle().Background(lipgloss.Color("10")).Foreground(lipgloss.Color("15"))
-	return style.Render("Hello World " + a.iface)
+	if a.mainScreen != nil {
+		return a.mainScreen.View()
+	}
+	return "empty"
 }

@@ -48,6 +48,13 @@ func (m doneScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.lastError = ""
 				if err != nil {
 					m.lastError = err.Error()
+				} else {
+					err = m.app.LoadInterface(m.blueprint.InterfaceName)
+
+					if err == nil {
+						m.app.Settings.DefaultInterface = m.blueprint.InterfaceName
+						_ = m.app.SaveSettings()
+					}
 				}
 				m.pressEnter = true
 				return m, nil

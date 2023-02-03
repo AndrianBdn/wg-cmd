@@ -6,9 +6,9 @@ import (
 	"os"
 )
 
-func (app *App) CreateNewServer(b backend.ServerBlueprint) error {
+func (a *App) CreateNewServer(b backend.ServerBlueprint) error {
 
-	p := app.interfaceDir(b.InterfaceName)
+	p := a.interfaceDir(b.InterfaceName)
 	if _, err := os.Stat(p); err == nil {
 		return fmt.Errorf("interface directory exists %s", p)
 	}

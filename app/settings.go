@@ -34,6 +34,28 @@ func readSettings() (*Settings, error) {
 	return &s, nil
 }
 
+func (a *App) SaveSettings() error {
+	configPath, err := xdg.ConfigFile("wg-cmd/config.toml")
+	if err != nil {
+		return fmt.Errorf("xdg %w", err)
+	}
+
+	f, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return fmt.Errorf("SaveSettings OpenFile %w", err)
+	}
+
+	if err := toml.NewEncoder(f).Encode(a.Settings); err != nil {
+		return fmt.Errorf("SaveSettings err toml encode %w", err)
+	}
+
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("SaveSettings close %w", err)
+	}
+
+	return nil
+}
+
 func defaultSettings() Settings {
 	dd := os.Getenv("DEBUG_WG_CMD_DIR")
 

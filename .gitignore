@@ -4,3 +4,4 @@ wg-dir-conf
 ignore
 .idea
 deploy.sh
+debug

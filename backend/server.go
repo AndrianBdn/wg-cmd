@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const ServerFileName = `001-server.toml`
+const ServerFileName = `0001-server.toml`
 
 type ServerBlueprint struct {
 	InterfaceName string

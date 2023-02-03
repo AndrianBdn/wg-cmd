@@ -16,6 +16,51 @@ type State struct {
 	Clients map[int]*Client
 }
 
+func (s *State) CanAddPeer(peerName string) (int, error) {
+	r := regexp.MustCompile(`^` + PeerNameRegExp + `$`)
+	if !r.MatchString(peerName) {
+		return -1, fmt.Errorf("<peer_name> must start with letter, contain only letters, numbers, underscore, dash")
+	}
+
+	for _, excl := range s.Clients {
+		if excl.GetName() == peerName {
+			return -1, fmt.Errorf("peer name %s is already used by %s", peerName, excl.GetFileName())
+		}
+	}
+
+	foundIP := -1
+	for i := 2; i < 4096; i++ {
+		if _, ok := s.Clients[i]; !ok {
+			foundIP = i
+			break
+		}
+	}
+
+	if foundIP == -1 {
+		return -1, fmt.Errorf("subnet depleted, all addresses in use")
+	}
+
+	return foundIP, nil
+}
+
+func (s *State) AddPeer(peerName string) error {
+
+	foundIP, err := s.CanAddPeer(peerName)
+	if err != nil {
+		return err
+	}
+
+	c := NewClient(foundIP, peerName)
+	err = c.WriteOnce()
+	if err != nil {
+		return fmt.Errorf("can't write %s: %w", c.GetFileName(), err)
+	}
+
+	s.Clients[foundIP] = c
+
+	return nil
+}
+
 func ReadState(dir string, wlog *log.Logger) (*State, error) {
 	if _, err := os.Stat(filepath.Join(dir, ServerFileName)); os.IsNotExist(err) {
 		return nil, fmt.Errorf("cannot find %s in wgcmd interface directory %s", ServerFileName, dir)

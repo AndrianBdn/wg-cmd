@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/andrianbdn/wg-dir-conf/backend"
 	"github.com/andrianbdn/wg-dir-conf/sysinfo"
-	tea "github.com/charmbracelet/bubbletea"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,10 +15,9 @@ import (
 
 type App struct {
 	Settings *Settings
-	logger   *log.Logger
-	state    *backend.State
+	State    *backend.State
 
-	dialog tea.Model
+	logger *log.Logger
 }
 
 func NewApp() *App {
@@ -33,33 +32,51 @@ func NewApp() *App {
 		logger:   log.New(os.Stderr, "", 0),
 	}
 
-	st, err := backend.ReadState(
-		filepath.Join(a.Settings.DatabaseDir, a.Settings.DefaultInterface),
-		a.logger,
-	)
-
-	if st != nil && err == nil {
-		a.state = st
+	err = a.LoadInterface(a.Settings.DefaultInterface)
+	if err != nil {
+		panic(err)
 	}
 
 	return &a
 }
 
-func (app *App) ValidateIfaceArg(ifName string) string {
+func (a *App) LoadInterface(ifName string) error {
+	a.State = nil
+
+	if ifName == "" {
+		return nil
+	}
+	p := a.interfaceDir(ifName)
+	if _, err := os.Stat(p); err != nil {
+		return nil
+	}
+	err := os.Chdir(p)
+	if err != nil {
+		return fmt.Errorf("can't chdir %s:%w", p, err)
+	}
+
+	state, err := backend.ReadState(p, log.New(io.Discard, "", 0))
+	if err == nil {
+		a.State = state
+	}
+	return err
+}
+
+func (a *App) ValidateIfaceArg(ifName string) string {
 	if !regexp.MustCompile(`^wg\d{1,4}$`).MatchString(ifName) {
 		return "Interface name should be in form wg<number>"
 	}
 
-	p := filepath.Join(app.Settings.WireguardDir, ifName+".conf")
+	p := filepath.Join(a.Settings.WireguardDir, ifName+".conf")
 	if _, err := os.Stat(p); err == nil {
-		return fmt.Sprintf("Found config for %s at %s. Try a different name.", ifName, app.Settings.WireguardDir)
+		return fmt.Sprintf("Found config for %s at %s. Try a different name.", ifName, a.Settings.WireguardDir)
 	}
 
-	p = app.interfaceDir(ifName)
+	p = a.interfaceDir(ifName)
 	if _, err := os.Stat(p); err == nil {
 		return fmt.Sprintf("Found directory %s at %s. Try a different name.",
 			filepath.Base(p),
-			app.Settings.WireguardDir)
+			a.Settings.WireguardDir)
 	}
 
 	if sysinfo.NetworkInterfaceExists(ifName) {
@@ -69,22 +86,22 @@ func (app *App) ValidateIfaceArg(ifName string) string {
 	return ""
 }
 
-func (app *App) TestDirectories() string {
-	dbTest := testDir(app.Settings.DatabaseDir)
+func (a *App) TestDirectories() string {
+	dbTest := testIfDirWritable(a.Settings.DatabaseDir)
 
-	if app.Settings.DatabaseDir == app.Settings.WireguardDir || dbTest != "" {
+	if a.Settings.DatabaseDir == a.Settings.WireguardDir || dbTest != "" {
 		return dbTest
 	}
 
-	return testDir(app.Settings.WireguardDir)
+	return testIfDirWritable(a.Settings.WireguardDir)
 }
 
-func (app *App) interfaceDir(i string) string {
+func (a *App) interfaceDir(i string) string {
 	d := "wgc-" + i
-	return filepath.Join(app.Settings.DatabaseDir, d)
+	return filepath.Join(a.Settings.DatabaseDir, d)
 }
 
-func testDir(dir string) string {
+func testIfDirWritable(dir string) string {
 	if _, err := os.Stat(dir); err != nil {
 		return fmt.Sprint("can't stat", dir, err.Error())
 	}

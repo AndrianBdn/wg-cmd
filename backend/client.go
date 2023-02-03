@@ -32,7 +32,7 @@ func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, e
 }
 
 func NewClient(ip int, name string) *Client {
-	fileName := fmt.Sprintf("%03d-%s.toml", ip, name)
+	fileName := fmt.Sprintf("%04d-%s.toml", ip, name)
 	c := Client{ipNum: ip, name: name, fileName: fileName}
 	key, err := wgtypes.GeneratePrivateKey()
 	if err != nil {
@@ -64,19 +64,28 @@ func (c *Client) WriteOnce() error {
 func (c *Client) AllowedIps(srv *Server) string {
 	result := ""
 	if srv.Address4 != "" {
-		cAdd := c.ipNum / 256
-		d := c.ipNum % 256
-		result += srv.addrInfo4.prefix + strconv.Itoa(int(srv.addrInfo4.c)+cAdd) + "." + strconv.Itoa(d) + "/32"
+		result += c.GetIP4(srv)
 	}
 	if srv.Address6 != "" {
-		if result != "" {
-			result += ", "
-		}
-		b := make([]byte, 2)
-		binary.BigEndian.PutUint16(b, uint16(c.ipNum))
-		result += srv.addrInfo6.prefix + hex.EncodeToString(b) + "/128"
+		result = concatIfNotEmpty(result, ", ")
+		result += c.GetIP6(srv)
 	}
 	return result
+}
+
+func (c *Client) GetIP4(srv *Server) string {
+	cAdd := c.ipNum / 256
+	d := c.ipNum % 256
+	return srv.addrInfo4.prefix + strconv.Itoa(int(srv.addrInfo4.c)+cAdd) + "." + strconv.Itoa(d) + "/32"
+}
+
+func (c *Client) GetIP6(srv *Server) string {
+	if srv.addrInfo6 == nil {
+		return ""
+	}
+	b := make([]byte, 2)
+	binary.BigEndian.PutUint16(b, uint16(c.ipNum))
+	return srv.addrInfo6.prefix + hex.EncodeToString(b) + "/128"
 }
 
 func (c *Client) GetName() string {
@@ -89,4 +98,8 @@ func (c *Client) GetFileName() string {
 
 func (c *Client) GetIPNumber() int {
 	return c.ipNum
+}
+
+func (c *Client) GetIPNumberString() string {
+	return fmt.Sprintf("%04d", c.ipNum)
 }
