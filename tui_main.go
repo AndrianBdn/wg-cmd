@@ -88,6 +88,13 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
+
+	case TuiDialogYes:
+		m.dialog = nil
+
+	case TuiDialogNo:
+		m.dialog = nil
+
 	case TuiDialogValue:
 		peer := string(msg)
 		_ = m.app.State.AddPeer(peer)
@@ -134,6 +141,13 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.dialog = d
 			return m, d.Init()
+
+		case tea.KeyF8:
+			name := m.table.GetCursorValue()
+			confirm := NewTuiDialogYesNo("Delete peer \"" + name + "\"?")
+			confirm.Title = "Delete"
+			m.dialog = confirm
+			return m, m.dialog.Init()
 
 		case tea.KeyEnter:
 			/*

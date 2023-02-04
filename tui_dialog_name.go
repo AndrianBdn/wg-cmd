@@ -95,7 +95,7 @@ func (m TuiDialogName) View() string {
 			titleStyle.Render(m.Title),
 			questionStyle.Render(m.Question),
 			m.field.View(),
-			buttonStyle.Render("[<  OK  >] [ Cancel ]"),
+			buttonStyle.Render("[<  Enter  >] [   ESC   ]"),
 		),
 	)
 
