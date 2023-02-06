@@ -82,7 +82,7 @@ func (m TuiDialogName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m TuiDialogName) View() string {
 	if m.validationError != "" {
-		return ErrorView(m.validationError)
+		return ErrorView("Error", m.validationError)
 	}
 
 	frameStyle := lipgloss.NewStyle().Background(lipgloss.Color("7")).Foreground(lipgloss.Color("0")).Width(54).Padding(1, 2)
@@ -96,21 +96,6 @@ func (m TuiDialogName) View() string {
 			questionStyle.Render(m.Question),
 			m.field.View(),
 			buttonStyle.Render("[<  Enter  >] [   ESC   ]"),
-		),
-	)
-
-}
-
-func ErrorView(message string) string {
-
-	frameStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("0")).Width(34).Padding(1, 2)
-	titleStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("3")).Width(30).Align(0.5)
-	msgStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("15")).Width(30).Align(0.5).Padding(1, 0)
-
-	return frameStyle.Render(
-		lipgloss.JoinVertical(0,
-			titleStyle.Render("Error"),
-			msgStyle.Render(message),
 		),
 	)
 

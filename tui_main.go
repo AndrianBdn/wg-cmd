@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/76creates/stickers"
 	"github.com/andrianbdn/wg-dir-conf/app"
+	"github.com/andrianbdn/wg-dir-conf/tutils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -36,7 +37,8 @@ type mainScreenTable struct {
 	app   *app.App
 	sSize tea.WindowSizeMsg
 
-	dialog tea.Model
+	dialog           tea.Model
+	dialogFullScreen bool
 
 	keys  keyMap
 	table *stickers.TableSingleType[string]
@@ -84,10 +86,13 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.help.Width = msg.Width
 		m.table.SetWidth(msg.Width)
 		m.table.SetHeight(msg.Height - 1)
-		return m, nil
 	}
 
 	switch msg := msg.(type) {
+
+	case TuiDialogMsgResult:
+		m.dialogFullScreen = false
+		m.dialog = nil
 
 	case TuiDialogYes:
 		m.dialog = nil
@@ -126,35 +131,21 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case tea.KeyF7:
-			d := NewTuiDialogName()
-			d.Title = "Create a new Peer"
-			d.Question = "Enter new peer name"
-			d.ValidationFunc = func(s string) string {
-				if s == "" {
-					return "cannot be empty"
-				}
-				_, err := m.app.State.CanAddPeer(s)
-				if err != nil {
-					return err.Error()
-				}
-				return ""
-			}
-			m.dialog = d
-			return m, d.Init()
+			return m.CreatePeer()
 
 		case tea.KeyF8:
-			name := m.table.GetCursorValue()
-			confirm := NewTuiDialogYesNo("Delete peer \"" + name + "\"?")
-			confirm.Title = "Delete"
-			m.dialog = confirm
-			return m, m.dialog.Init()
+			return m.DeletePeer()
 
 		case tea.KeyEnter:
-			/*
-				return m, tea.Batch(
-					tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
-				)
-			*/
+			_, row := m.table.GetCursorLocation()
+			if row == 0 {
+				m.dialog = NewTuiDialogMsg("Error", "Could not view server")
+				return m, m.dialog.Init()
+			}
+			row++
+			m.dialogFullScreen = true
+			m.dialog = NewViewPeer(m.sSize, m.app.State.Server, m.app.State.Clients[row])
+			return m, m.dialog.Init()
 
 		case tea.KeyDown:
 			m.table.CursorDown()
@@ -169,10 +160,48 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m mainScreenTable) View() string {
+	helpView := m.help.View(m.keys)
+	mainScreen := lipgloss.JoinVertical(lipgloss.Left, m.table.Render(), helpView)
+
 	if m.dialog != nil {
-		return m.dialog.View()
+		if m.dialogFullScreen {
+			return m.dialog.View()
+		}
+
+		bgs := lipgloss.NewStyle().Background(lipgloss.Color(0)).Foreground(lipgloss.Color("237"))
+		return tutils.PlaceDialog(m.dialog.View(), mainScreen, bgs)
 	}
 
-	helpView := m.help.View(m.keys)
-	return lipgloss.JoinVertical(lipgloss.Left, m.table.Render(), helpView)
+	return mainScreen
+
+}
+
+func (m mainScreenTable) CreatePeer() (tea.Model, tea.Cmd) {
+	d := NewTuiDialogName()
+	d.Title = "Create a new Peer"
+	d.Question = "Enter new peer name"
+	d.ValidationFunc = func(s string) string {
+		if s == "" {
+			return "cannot be empty"
+		}
+		_, err := m.app.State.CanAddPeer(s)
+		if err != nil {
+			return err.Error()
+		}
+		return ""
+	}
+	m.dialog = d
+	return m, d.Init()
+}
+
+func (m mainScreenTable) DeletePeer() (tea.Model, tea.Cmd) {
+	_, row := m.table.GetCursorLocation()
+	if row == 0 {
+		m.dialog = NewTuiDialogMsg("Error", "Could not delete server")
+		return m, m.dialog.Init()
+	}
+
+	name := m.table.GetCursorValue()
+	m.dialog = NewTuiDialogYesNo("Delete", "Delete peer \""+name+"\"?")
+	return m, m.dialog.Init()
 }

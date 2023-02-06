@@ -27,6 +27,7 @@ func newTable(app *app.App) *stickers.TableSingleType[string] {
 	minSize := []int{5, 10, 11, 16}
 	t.SetRatio(ratio).SetMinWidth(minSize)
 	t.AddRows(rows)
+	t.CursorRight()
 
 	return t
 }

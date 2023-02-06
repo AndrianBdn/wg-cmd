@@ -14,8 +14,8 @@ type TuiDialogYesNo struct {
 	selectedButton int
 }
 
-func NewTuiDialogYesNo(q string) TuiDialogYesNo {
-	return TuiDialogYesNo{Message: q}
+func NewTuiDialogYesNo(title, message string) TuiDialogYesNo {
+	return TuiDialogYesNo{Title: title, Message: message}
 }
 
 func (m TuiDialogYesNo) Init() tea.Cmd {

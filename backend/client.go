@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -102,4 +103,14 @@ func (c *Client) GetIPNumber() int {
 
 func (c *Client) GetIPNumberString() string {
 	return fmt.Sprintf("%04d", c.ipNum)
+}
+
+func (c *Client) GetPlainTextConfig(srv *Server) (string, error) {
+	buf := bytes.NewBuffer(nil)
+	err := GenerateClientConfig(srv, c, buf)
+	if err != nil {
+		return "", fmt.Errorf("generate client config %w", err)
+	}
+
+	return buf.String() + "\n", nil
 }
