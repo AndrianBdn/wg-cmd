@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-cmd/backend"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdp/qrterminal/v3"

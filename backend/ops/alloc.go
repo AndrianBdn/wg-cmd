@@ -2,7 +2,7 @@ package ops
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-cmd/backend"
 	"log"
 	"regexp"
 )

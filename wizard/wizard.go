@@ -1,9 +1,9 @@
 package wizard
 
 import (
-	"github.com/andrianbdn/wg-dir-conf/app"
-	"github.com/andrianbdn/wg-dir-conf/backend"
-	"github.com/andrianbdn/wg-dir-conf/sysinfo"
+	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/backend"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
 	tea "github.com/charmbracelet/bubbletea"
 	"math/rand"
 )

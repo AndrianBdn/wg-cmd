@@ -3,7 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/andrianbdn/wg-dir-conf/sysinfo"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"net"
 	"os"

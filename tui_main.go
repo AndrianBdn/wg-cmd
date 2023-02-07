@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/76creates/stickers"
-	"github.com/andrianbdn/wg-dir-conf/app"
-	"github.com/andrianbdn/wg-dir-conf/tutils"
+	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/tutils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"

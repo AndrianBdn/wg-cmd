@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/76creates/stickers"
-	"github.com/andrianbdn/wg-dir-conf/app"
-	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/backend"
 	tea "github.com/charmbracelet/bubbletea"
 	"log"
 	"sort"

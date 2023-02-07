@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/app"
+	"github.com/andrianbdn/wg-cmd/app"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"
 )

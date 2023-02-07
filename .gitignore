@@ -1,6 +1,4 @@
-wg*-wg-dir-conf
-wgc-wg*
-wg-dir-conf
+wg-cmd
 ignore
 .idea
 deploy.sh

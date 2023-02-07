@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/andrianbdn/wg-dir-conf/app"
-	"github.com/andrianbdn/wg-dir-conf/wizard"
+	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/wizard"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

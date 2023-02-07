@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/backend/ops"
+	"github.com/andrianbdn/wg-cmd/backend/ops"
 	"github.com/lithammer/dedent"
 	"log"
 	"os"

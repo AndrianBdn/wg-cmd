@@ -3,7 +3,7 @@ package ops
 import (
 	"bytes"
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/backend"
+	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/mdp/qrterminal/v3"
 	"log"
 	"os"

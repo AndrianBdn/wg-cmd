@@ -2,7 +2,7 @@ package wizard
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/tutils"
+	"github.com/andrianbdn/wg-cmd/tutils"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"math"

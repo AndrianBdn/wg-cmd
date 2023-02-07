@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-dir-conf/backend"
-	"github.com/andrianbdn/wg-dir-conf/sysinfo"
+	"github.com/andrianbdn/wg-cmd/backend"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"os"
 	"regexp"
 )

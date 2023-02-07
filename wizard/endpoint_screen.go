@@ -1,8 +1,8 @@
 package wizard
 
 import (
-	"github.com/andrianbdn/wg-dir-conf/sysinfo"
-	"github.com/andrianbdn/wg-dir-conf/tutils"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
+	"github.com/andrianbdn/wg-cmd/tutils"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
