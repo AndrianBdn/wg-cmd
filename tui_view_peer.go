@@ -6,7 +6,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdp/qrterminal/v3"
+	"io"
+	"strings"
 )
+
+type qr struct {
+	qrCode string
+	size   int
+}
 
 type ViewPeer struct {
 	PeerName  string
@@ -15,16 +22,34 @@ type ViewPeer struct {
 	sSize     tea.WindowSizeMsg
 	qrEnabled bool
 	qrMode    bool
+	qrCodes   []qr
 }
+
+var qrPersist bool
 
 func NewViewPeer(sSize tea.WindowSizeMsg, srv *backend.Server, cl *backend.Client) ViewPeer {
 	cfg, err := cl.GetPlainTextConfig(srv)
 	qrEnabled := true
+	qrMode := qrPersist
 	if err != nil {
 		cfg = "Error: " + err.Error()
 		qrEnabled = false
+		qrMode = false
 	}
-	return ViewPeer{sSize: sSize, PeerName: cl.GetName(), Config: cfg, qrEnabled: qrEnabled}
+	qrs := make([]qr, 4)
+	qrs[0] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.M, w) })
+	qrs[1] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.L, w) })
+	qrs[2] = qrGenerate(func(w io.Writer) { qrterminal.GenerateHalfBlock(cfg, qrterminal.L, w) })
+	qrs[3] = qr{qrCode: "Terminal size is too small for QR code; enlarge windows / set smaller font", size: 1}
+
+	return ViewPeer{
+		sSize:     sSize,
+		PeerName:  cl.GetName(),
+		Config:    cfg,
+		qrEnabled: qrEnabled,
+		qrMode:    qrMode,
+		qrCodes:   qrs,
+	}
 }
 
 func (m ViewPeer) Init() tea.Cmd {
@@ -47,6 +72,7 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case tea.KeyF9:
 			m.qrMode = !m.qrMode
+			qrPersist = m.qrMode
 			return m, nil
 		}
 	}
@@ -86,9 +112,12 @@ func (m ViewPeer) View() string {
 
 	config := m.Config
 	if m.qrMode {
-		buf := bytes.NewBuffer(nil)
-		qrterminal.GenerateHalfBlock(config, qrterminal.L, buf)
-		config = buf.String()
+		for _, q := range m.qrCodes {
+			if q.size < m.sSize.Height-1 {
+				config = q.qrCode
+				break
+			}
+		}
 	}
 
 	return lipgloss.JoinVertical(0,
@@ -96,4 +125,11 @@ func (m ViewPeer) View() string {
 		body.Render(config),
 		helpLine,
 	)
+}
+
+func qrGenerate(cb func(io.Writer)) qr {
+	buf := bytes.NewBuffer(nil)
+	cb(buf)
+	q := strings.TrimSpace(buf.String())
+	return qr{qrCode: q, size: lipgloss.Height(q)}
 }

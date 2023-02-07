@@ -16,11 +16,11 @@ import (
 type App struct {
 	Settings *Settings
 	State    *backend.State
-
-	logger *log.Logger
 }
 
 func NewApp() *App {
+	configureLogger()
+
 	settings, err := readSettings()
 	if err != nil {
 		fmt.Println("Fatal error when reading settings", err)
@@ -29,7 +29,6 @@ func NewApp() *App {
 
 	a := App{
 		Settings: settings,
-		logger:   log.New(os.Stderr, "", 0),
 	}
 
 	err = a.LoadInterface(a.Settings.DefaultInterface)
@@ -60,6 +59,11 @@ func (a *App) LoadInterface(ifName string) error {
 		a.State = state
 	}
 	return err
+}
+
+func (a *App) GenerateWireguardConfig() error {
+	configPath := filepath.Join(a.Settings.WireguardDir, a.State.Server.Interface) + ".conf"
+	return a.State.GenerateWireguardFile(configPath, false)
 }
 
 func (a *App) ValidateIfaceArg(ifName string) string {

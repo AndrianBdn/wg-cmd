@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -57,6 +58,59 @@ func (s *State) AddPeer(peerName string) error {
 	}
 
 	s.Clients[foundIP] = c
+
+	return nil
+}
+
+func (s *State) DeletePeer(idx int) error {
+	cl := s.Clients[idx]
+	if cl == nil {
+		log.Println("peer not found", idx)
+		log.Printf("%+v", s.Clients)
+
+		return fmt.Errorf("peer not found")
+	}
+
+	log.Printf("%+v", cl)
+	log.Println(cl.GetFileName())
+
+	err := os.Remove(cl.GetFileName())
+	if err != nil {
+		return fmt.Errorf("can't remove %w", err)
+	}
+	delete(s.Clients, idx)
+	return nil
+}
+
+func (s *State) GenerateWireguardFile(wgConfigPath string, backup bool) error {
+	buf := bytes.NewBuffer(nil)
+	err := generateWireguardConfig(s, buf)
+	if err != nil {
+		return fmt.Errorf("server config generation: %w", err)
+	}
+
+	if _, err := os.Stat(wgConfigPath); err == nil {
+		if backup {
+			backupFile := wgConfigPath + ".bak"
+			if _, err := os.Stat(backupFile); err == nil {
+				err = os.Remove(backupFile)
+				if err != nil {
+					return fmt.Errorf("removing .bak file: %w", err)
+				}
+			}
+			err = os.Rename(wgConfigPath, backupFile)
+			if err != nil {
+				return fmt.Errorf("creating .bak file: %w", err)
+			}
+		} else {
+			// WriteFile will override
+		}
+	}
+
+	err = os.WriteFile(wgConfigPath, buf.Bytes(), 0600)
+	if err != nil {
+		return fmt.Errorf("writing to %s file: %w", wgConfigPath, err)
+	}
 
 	return nil
 }

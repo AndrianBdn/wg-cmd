@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"log"
 )
 
 // keyMap defines a set of keybindings. To work for help it must satisfy
@@ -72,7 +73,7 @@ func newMainScreenTable(app *app.App, sSize tea.WindowSizeMsg) mainScreenTable {
 		sSize: sSize,
 		keys:  keys,
 		help:  helpModel,
-		table: newTable(app),
+		table: newTable(app, sSize),
 	}
 }
 
@@ -95,19 +96,14 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dialog = nil
 
 	case TuiDialogYes:
-		m.dialog = nil
+		return m.ReallyDeletePeer(), nil
 
 	case TuiDialogNo:
 		m.dialog = nil
 
 	case TuiDialogValue:
 		peer := string(msg)
-		_ = m.app.State.AddPeer(peer)
-		m.dialog = nil
-		m.table = newTable(m.app)
-		m.table.SetWidth(m.sSize.Width)
-		m.table.SetHeight(m.sSize.Height - 1)
-		return m, nil
+		return m.ReallyAddPeer(peer), nil
 
 	case TuiDialogCancel:
 		_ = msg
@@ -142,9 +138,14 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.dialog = NewTuiDialogMsg("Error", "Could not view server")
 				return m, m.dialog.Init()
 			}
-			row++
+
+			p := peerRow(m.app, m.table)
+			if p == nil {
+				return m, nil
+			}
+
 			m.dialogFullScreen = true
-			m.dialog = NewViewPeer(m.sSize, m.app.State.Server, m.app.State.Clients[row])
+			m.dialog = NewViewPeer(m.sSize, m.app.State.Server, p)
 			return m, m.dialog.Init()
 
 		case tea.KeyDown:
@@ -201,7 +202,46 @@ func (m mainScreenTable) DeletePeer() (tea.Model, tea.Cmd) {
 		return m, m.dialog.Init()
 	}
 
-	name := m.table.GetCursorValue()
-	m.dialog = NewTuiDialogYesNo("Delete", "Delete peer \""+name+"\"?")
+	peer := peerRow(m.app, m.table)
+	if peer == nil {
+		return m, nil
+	}
+
+	m.dialog = NewTuiDialogYesNo("Delete", "Delete peer \""+peer.GetName()+"\"?")
 	return m, m.dialog.Init()
+}
+
+func (m mainScreenTable) ReallyAddPeer(name string) mainScreenTable {
+	err := m.app.State.AddPeer(name)
+	if err != nil {
+		log.Println("Error adding peer", err)
+	}
+	if err == nil {
+		_ = m.app.GenerateWireguardConfig()
+	}
+	m.dialog = nil
+	m.table = newTable(m.app, m.sSize)
+	return m
+}
+
+func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
+	_, row := m.table.GetCursorLocation()
+	if row == 0 {
+		panic("we don't delete server")
+	}
+
+	peer := peerRow(m.app, m.table)
+	if peer != nil {
+		err := m.app.State.DeletePeer(peer.GetIPNumber())
+		if err != nil {
+			log.Println("Error deleting peer", err)
+		}
+		if err == nil {
+			_ = m.app.GenerateWireguardConfig()
+		}
+
+		m.table = newTable(m.app, m.sSize)
+	}
+	m.dialog = nil
+	return m
 }

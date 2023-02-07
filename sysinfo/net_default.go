@@ -7,7 +7,7 @@ func DefaultIP4Interface() string {
 }
 
 func HasIP6() bool {
-	return false
+	return true
 }
 
 func DefaultIP6Interface() string {

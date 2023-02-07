@@ -14,7 +14,7 @@ func PlaceDialog(dialog, background string, bgStyle lipgloss.Style) string {
 	w, h := lipgloss.Size(dialog)
 
 	posx := (bw - w) / 2
-	posy := (bh-h)/2 - 10
+	posy := bh/2 - h/2 - h/4
 
 	bLines := strings.Split(cleanBg, "\n")
 	dLines := strings.Split(dialog, "\n")
@@ -22,10 +22,14 @@ func PlaceDialog(dialog, background string, bgStyle lipgloss.Style) string {
 	for i := 0; i < bh; i++ {
 
 		if i >= posy && i < posy+h {
-			result += bgStyle.Render(bLines[i][0:posx])
+			if posx > 0 {
+				result += bgStyle.Render(bLines[i][0:posx])
+			}
 			result += dLines[i-posy]
 			st := posx + w
-			result += bgStyle.Render(bLines[i][st:])
+			if st < bw {
+				result += bgStyle.Render(bLines[i][st:])
+			}
 		} else {
 			result += bgStyle.Render(bLines[i])
 		}
@@ -34,15 +38,6 @@ func PlaceDialog(dialog, background string, bgStyle lipgloss.Style) string {
 			result += "\n"
 		}
 	}
-	//for i := 0; i < h; i++ {
-	//	result += dLines[i] + "\n"
-	_ = posx
-	//}
-	//
-	//leftH := bh - posy - h
-	//for i := 0; i < leftH; i++ {
-	//	result += bgStyle.Render(bLines[i]) + "\n"
-	//}
 
 	return result
 }

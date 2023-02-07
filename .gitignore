@@ -5,3 +5,4 @@ ignore
 .idea
 deploy.sh
 debug
+wg-cmd.log
