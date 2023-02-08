@@ -40,8 +40,6 @@ func NewApp() *App {
 }
 
 func (a *App) LoadInterface(ifName string) error {
-	a.State = nil
-
 	if ifName == "" {
 		return nil
 	}

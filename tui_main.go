@@ -2,12 +2,16 @@ package main
 
 import (
 	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/backend"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"github.com/andrianbdn/wg-cmd/theme"
 	"github.com/andrianbdn/wg-cmd/tutils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"log"
+	"os"
+	"os/exec"
 )
 
 // keyMap defines a set of keybindings. To work for help it must satisfy
@@ -42,10 +46,13 @@ type mainScreenTable struct {
 
 	table    DynamicTableList
 	helpKeys []helpKey
+
+	reopenEditor bool
 }
 
 func newMainScreenTable(app *app.App, sSize tea.WindowSizeMsg) mainScreenTable {
 	helpKeys := []helpKey{
+		helpKey{key: "F4", help: "Edit"},
 		helpKey{key: "F7", help: "Add Peer"},
 		helpKey{key: "F8", help: "Delete Peer"},
 		helpKey{key: "F10", help: "Quit"},
@@ -74,6 +81,9 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case TuiDialogMsgResult:
 		m.dialogFullScreen = false
 		m.dialog = nil
+		if m.reopenEditor {
+			return m.EditCurrentItem(), tea.ClearScreen
+		}
 
 	case TuiDialogYes:
 		return m.ReallyDeletePeer(), nil
@@ -102,6 +112,9 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.Type {
+
+		case tea.KeyF4:
+			return m.EditCurrentItem(), tea.ClearScreen
 
 		case tea.KeyF10:
 			return m, tea.Quit
@@ -230,5 +243,44 @@ func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
 		m.table.DeleteSelectedRow()
 	}
 	m.dialog = nil
+	return m
+}
+
+func (m mainScreenTable) EditCurrentItem() mainScreenTable {
+	file := ""
+	if m.table.GetSelectedIndex() == 0 {
+		file = backend.ServerFileName
+	} else {
+		peer := clientFromRow(m.app, m.table.GetSelected())
+		if peer != nil {
+			file = peer.GetFileName()
+		}
+	}
+
+	editor := sysinfo.GetSystemEditorPath()
+	if editor == "" {
+		m.dialog = NewTuiDialogMsg("Error", "Cannot find any editor")
+		return m
+	}
+
+	cmd := exec.Command(editor, file)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	if err != nil {
+		m.dialog = NewTuiDialogMsg("Error", "Cannot start editor: "+err.Error())
+		return m
+	}
+	err = cmd.Wait()
+	err = m.app.LoadInterface(m.app.State.Server.Interface)
+
+	if err != nil {
+		m.dialog = NewTuiDialogMsg("Error", "Error reloading state: "+err.Error()+". Edit file to fix the problem.")
+		m.reopenEditor = true
+		return m
+	}
+	m.reopenEditor = false
+
 	return m
 }
