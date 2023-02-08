@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/76creates/stickers"
 	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/theme"
 	"github.com/andrianbdn/wg-cmd/tutils"
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -41,39 +40,22 @@ type mainScreenTable struct {
 	dialog           tea.Model
 	dialogFullScreen bool
 
-	keys  keyMap
-	table *stickers.TableSingleType[string]
-	help  help.Model
+	table    DynamicTableList
+	helpKeys []helpKey
 }
 
 func newMainScreenTable(app *app.App, sSize tea.WindowSizeMsg) mainScreenTable {
-
-	keys := keyMap{
-		NewPeer: key.NewBinding(
-			key.WithKeys("F7"),
-			key.WithHelp("F7", "NewPeer"),
-		),
-		DeletePeer: key.NewBinding(
-			key.WithKeys("F8"),
-			key.WithHelp("F8", "DelPeer"),
-		),
-		Quit: key.NewBinding(
-			key.WithKeys("F10"),
-			key.WithHelp("F10", "Quit"),
-		),
+	helpKeys := []helpKey{
+		helpKey{key: "F7", help: "Add Peer"},
+		helpKey{key: "F8", help: "Delete Peer"},
+		helpKey{key: "F10", help: "Quit"},
 	}
 
-	helpModel := help.New()
-	helpModel.Styles.ShortKey = lipgloss.NewStyle().Foreground(lipgloss.Color("15"))
-	helpModel.Styles.ShortDesc = lipgloss.NewStyle().Background(lipgloss.Color("14")).Foreground(lipgloss.Color("0")).Width(12)
-	helpModel.ShortSeparator = " "
-
 	return mainScreenTable{
-		app:   app,
-		sSize: sSize,
-		keys:  keys,
-		help:  helpModel,
-		table: newTable(app, sSize),
+		app:      app,
+		sSize:    sSize,
+		helpKeys: helpKeys,
+		table:    newAppDynamicTableList(app),
 	}
 }
 
@@ -84,9 +66,7 @@ func (m mainScreenTable) Init() tea.Cmd {
 func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
-		m.help.Width = msg.Width
-		m.table.SetWidth(msg.Width)
-		m.table.SetHeight(msg.Height - 1)
+		m.table.SetTableSize(msg, 0, -1)
 	}
 
 	switch msg := msg.(type) {
@@ -133,13 +113,13 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.DeletePeer()
 
 		case tea.KeyEnter:
-			_, row := m.table.GetCursorLocation()
+			row := m.table.GetSelectedIndex()
 			if row == 0 {
 				m.dialog = NewTuiDialogMsg("Error", "Could not view server")
 				return m, m.dialog.Init()
 			}
 
-			p := peerRow(m.app, m.table)
+			p := clientFromRow(m.app, m.table.GetSelected())
 			if p == nil {
 				return m, nil
 			}
@@ -149,10 +129,16 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.dialog.Init()
 
 		case tea.KeyDown:
-			m.table.CursorDown()
+			m.table.Down()
+
+		case tea.KeyPgUp:
+			m.table.PageUp()
 
 		case tea.KeyUp:
-			m.table.CursorUp()
+			m.table.Up()
+
+		case tea.KeyPgDown:
+			m.table.PageDown()
 
 		}
 	}
@@ -161,16 +147,17 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m mainScreenTable) View() string {
-	helpView := m.help.View(m.keys)
-	mainScreen := lipgloss.JoinVertical(lipgloss.Left, m.table.Render(), helpView)
+	mainScreen := lipgloss.JoinVertical(lipgloss.Left,
+		m.table.Render(),
+		RenderHelpLine(m.sSize.Width, m.helpKeys...),
+	)
 
 	if m.dialog != nil {
 		if m.dialogFullScreen {
 			return m.dialog.View()
 		}
 
-		bgs := lipgloss.NewStyle().Background(lipgloss.Color(0)).Foreground(lipgloss.Color("237"))
-		return tutils.PlaceDialog(m.dialog.View(), mainScreen, bgs)
+		return tutils.PlaceDialog(m.dialog.View(), mainScreen, theme.Current.MainTableDimmed)
 	}
 
 	return mainScreen
@@ -196,13 +183,13 @@ func (m mainScreenTable) CreatePeer() (tea.Model, tea.Cmd) {
 }
 
 func (m mainScreenTable) DeletePeer() (tea.Model, tea.Cmd) {
-	_, row := m.table.GetCursorLocation()
+	row := m.table.GetSelectedIndex()
 	if row == 0 {
 		m.dialog = NewTuiDialogMsg("Error", "Could not delete server")
 		return m, m.dialog.Init()
 	}
 
-	peer := peerRow(m.app, m.table)
+	peer := clientFromRow(m.app, m.table.GetSelected())
 	if peer == nil {
 		return m, nil
 	}
@@ -220,17 +207,17 @@ func (m mainScreenTable) ReallyAddPeer(name string) mainScreenTable {
 		_ = m.app.GenerateWireguardConfig()
 	}
 	m.dialog = nil
-	m.table = newTable(m.app, m.sSize)
+	m.table = newAppDynamicTableList(m.app)
 	return m
 }
 
 func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
-	_, row := m.table.GetCursorLocation()
+	row := m.table.GetSelectedIndex()
 	if row == 0 {
 		panic("we don't delete server")
 	}
 
-	peer := peerRow(m.app, m.table)
+	peer := clientFromRow(m.app, m.table.GetSelected())
 	if peer != nil {
 		err := m.app.State.DeletePeer(peer.GetIPNumber())
 		if err != nil {
@@ -240,7 +227,7 @@ func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
 			_ = m.app.GenerateWireguardConfig()
 		}
 
-		m.table = newTable(m.app, m.sSize)
+		m.table.DeleteSelectedRow()
 	}
 	m.dialog = nil
 	return m

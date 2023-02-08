@@ -1,5 +1,3 @@
-github.com/76creates/stickers v0.0.0-20221228130522-99e8eca7151c h1:0xcR1jh8hNqH6XwgaMhPMBlL/EIi8eD10dWQQGhrxs0=
-github.com/76creates/stickers v0.0.0-20221228130522-99e8eca7151c/go.mod h1:z/6G23++VMIXkwi+nFfb4H6Y4dIo6UsHULeYPp2DAkQ=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/adrg/xdg v0.4.0 h1:RzRqFcjH4nE5C6oTAxhBtoE2IRyjBSa62SCbyPidvls=

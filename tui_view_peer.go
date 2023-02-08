@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/andrianbdn/wg-cmd/backend"
+	"github.com/andrianbdn/wg-cmd/theme"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdp/qrterminal/v3"
@@ -17,6 +18,7 @@ type qr struct {
 
 type ViewPeer struct {
 	PeerName  string
+	PeerInfo  string
 	Comment   string
 	Config    string
 	sSize     tea.WindowSizeMsg
@@ -42,9 +44,15 @@ func NewViewPeer(sSize tea.WindowSizeMsg, srv *backend.Server, cl *backend.Clien
 	qrs[2] = qrGenerate(func(w io.Writer) { qrterminal.GenerateHalfBlock(cfg, qrterminal.L, w) })
 	qrs[3] = qr{qrCode: "Terminal size is too small for QR code; enlarge windows / set smaller font", size: 1}
 
+	ip6 := cl.GetIP6(srv)
+	if ip6 != "" {
+		ip6 = " IP6 " + ip6
+	}
+
 	return ViewPeer{
 		sSize:     sSize,
 		PeerName:  cl.GetName(),
+		PeerInfo:  "IP4 " + cl.GetIP4(srv) + ip6,
 		Config:    cfg,
 		qrEnabled: qrEnabled,
 		qrMode:    qrMode,
@@ -80,35 +88,17 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m ViewPeer) View() string {
-	ccyan := lipgloss.Color("6")
-	cblk := lipgloss.Color("0")
-	cblue := lipgloss.Color("4")
-	cgray := lipgloss.Color("7")
-	cwhite := lipgloss.Color("15")
+	header := theme.Current.ViewerTopBar.Copy().Width(m.sSize.Width)
+	body := theme.Current.ViewerMain.Copy().Width(m.sSize.Width).Height(m.sSize.Height - 2)
 
-	header := lipgloss.NewStyle().Background(ccyan).Foreground(cblk).Width(m.sSize.Width)
-	body := lipgloss.NewStyle().Background(cblue).Foreground(cgray).Width(m.sSize.Width).Height(m.sSize.Height - 2)
-
-	whiteOnBlack := lipgloss.NewStyle().Background(cblk).Foreground(cwhite)
-	blackOnCyan := lipgloss.NewStyle().Background(ccyan).Foreground(cblk)
-
-	fbtn := func(btn, text string) string {
-		b := blackOnCyan.Copy().Width(12)
-		return whiteOnBlack.Render(btn) + b.Render(text)
-	}
-
-	helpLine := ""
+	f9 := helpKey{key: "F9", help: "QR", hidden: true}
 	if m.qrEnabled {
-		qrButtonTitle := "QR"
 		if m.qrMode {
-			qrButtonTitle = "Text"
+			f9.help = "Text"
 		}
-		helpLine = fbtn("F9", qrButtonTitle) + whiteOnBlack.Render("  ")
+		f9.hidden = false
 	}
-	helpLine += fbtn("F10", "Close")
-
-	bw := m.sSize.Width - lipgloss.Width(helpLine)
-	helpLine = whiteOnBlack.Copy().Width(bw).Render(" ") + helpLine
+	f10 := helpKey{key: "F10", help: "Close"}
 
 	config := m.Config
 	if m.qrMode {
@@ -121,9 +111,9 @@ func (m ViewPeer) View() string {
 	}
 
 	return lipgloss.JoinVertical(0,
-		header.Render("Peer \""+m.PeerName+"\""),
+		header.Render("Peer \""+m.PeerName+"\" • "+m.PeerInfo),
 		body.Render(config),
-		helpLine,
+		RenderHelpLine(m.sSize.Width, f9, f10),
 	)
 }
 

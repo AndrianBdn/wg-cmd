@@ -3,7 +3,6 @@ module github.com/andrianbdn/wg-cmd
 go 1.19
 
 require (
-	github.com/76creates/stickers v0.0.0-20221228130522-99e8eca7151c
 	github.com/BurntSushi/toml v1.2.1
 	github.com/adrg/xdg v0.4.0
 	github.com/charmbracelet/bubbles v0.14.0
