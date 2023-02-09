@@ -43,13 +43,17 @@ func stringRowsFromApp(app *app.App) [][]string {
 	return rows
 }
 
-func newAppDynamicTableList(app *app.App) DynamicTableList {
-	return NewMainTable(
+func newAppDynamicTableList(app *app.App, table *DynamicTableList) DynamicTableList {
+	t := NewMainTable(
 		[]string{"#", "Name", "IPv4", "IPv6"},
 		stringRowsFromApp(app),
-		[]int{1, 3, 3, 3},
+		[]int{1, 3, 2, 3},
 		[]int{4, 20, 16, 46},
 	)
+	if table != nil {
+		t.CopyTableState(table)
+	}
+	return t
 }
 
 func clientFromRow(app *app.App, row []string) *backend.Client {

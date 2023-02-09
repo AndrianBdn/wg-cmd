@@ -11,6 +11,7 @@ type Settings struct {
 	WireguardDir     string
 	DatabaseDir      string
 	DefaultInterface string
+	ViewerQRMode     bool
 }
 
 func readSettings() (*Settings, error) {

@@ -1,16 +1,17 @@
 package tutils
 
 import (
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/leaanthony/go-ansi-parser"
 	"strings"
 )
 
-func PlaceDialog(dialog, background string, bgStyle lipgloss.Style) string {
+func PlaceDialog(dialog, background string, screenSize tea.WindowSizeMsg, bgStyle lipgloss.Style) string {
 	result := ""
 
 	cleanBg, _ := ansi.Cleanse(background)
-	bw, bh := lipgloss.Size(cleanBg)
+	bw, bh := screenSize.Width, screenSize.Height
 	w, h := lipgloss.Size(dialog)
 
 	posx := (bw - w) / 2

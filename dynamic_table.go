@@ -105,6 +105,12 @@ func (m *DynamicTableList) SetTableSize(msg tea.WindowSizeMsg, offsetW, offsetH 
 	m.tableSize = tea.WindowSizeMsg{Width: msg.Width + offsetW, Height: msg.Height + offsetH}
 }
 
+func (m *DynamicTableList) CopyTableState(table *DynamicTableList) {
+	m.tableSize = table.tableSize
+	m.offset = table.offset
+	m.selected = table.selected
+}
+
 func (m *DynamicTableList) GetSelected() []string {
 	return m.rows[m.selected]
 }

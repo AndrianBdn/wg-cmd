@@ -16,6 +16,14 @@ type Theme struct {
 	MainTableFirst         lipgloss.Style
 	MainTableSelectedFirst lipgloss.Style
 	MainTableDimmed        lipgloss.Style
+
+	DialogBackground             lipgloss.Style
+	DialogTitle                  lipgloss.Style
+	DialogInput                  lipgloss.Style
+	DialogInputCursor            lipgloss.Style
+	DialogButtonFirstLetter      lipgloss.Style
+	DialogButtonFocus            lipgloss.Style
+	DialogButtonFocusFirstLetter lipgloss.Style
 }
 
 func DefaultTheme() Theme {
@@ -33,5 +41,13 @@ func DefaultTheme() Theme {
 		MainTableSelectedFirst: style(66, 240, false),
 		MainTableFirst:         style(66, 235, false),
 		MainTableDimmed:        style(238, 235, true),
+
+		DialogBackground:             style(254, 238, false),
+		DialogTitle:                  style(33, 238, false),
+		DialogInput:                  style(39, 235, false),
+		DialogInputCursor:            style(39, 238, false),
+		DialogButtonFirstLetter:      style(33, 238, false),
+		DialogButtonFocus:            style(39, 240, false),
+		DialogButtonFocusFirstLetter: style(33, 240, false),
 	}
 }

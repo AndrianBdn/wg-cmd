@@ -19,7 +19,7 @@ func NewAppModel(app *app.App) AppModel {
 	if app.State == nil {
 		a.wizard = wizard.NewRootModel(app)
 	} else {
-		a.mainScreen = newMainScreenTable(app, a.sSize)
+		a.mainScreen = NewMainScreen(app, a.sSize)
 	}
 
 	return a
@@ -39,7 +39,7 @@ func (a AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if _, ok := msg.(wizard.Done); ok {
 		a.wizard = nil
-		a.mainScreen = newMainScreenTable(a.app, a.sSize)
+		a.mainScreen = NewMainScreen(a.app, a.sSize)
 		return a, nil
 	}
 

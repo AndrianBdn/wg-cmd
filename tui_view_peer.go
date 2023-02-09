@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/andrianbdn/wg-cmd/theme"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,46 +18,58 @@ type qr struct {
 }
 
 type ViewPeer struct {
-	PeerName  string
-	PeerInfo  string
-	Comment   string
-	Config    string
+	title     string
+	config    string
 	sSize     tea.WindowSizeMsg
 	qrEnabled bool
 	qrMode    bool
 	qrCodes   []qr
+	app       *app.App
 }
 
-var qrPersist bool
-
-func NewViewPeer(sSize tea.WindowSizeMsg, srv *backend.Server, cl *backend.Client) ViewPeer {
-	cfg, err := cl.GetPlainTextConfig(srv)
+func NewViewPeer(sSize tea.WindowSizeMsg, app *app.App, cl *backend.Client) ViewPeer {
 	qrEnabled := true
-	qrMode := qrPersist
-	if err != nil {
-		cfg = "Error: " + err.Error()
-		qrEnabled = false
-		qrMode = false
-	}
-	qrs := make([]qr, 4)
-	qrs[0] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.M, w) })
-	qrs[1] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.L, w) })
-	qrs[2] = qrGenerate(func(w io.Writer) { qrterminal.GenerateHalfBlock(cfg, qrterminal.L, w) })
-	qrs[3] = qr{qrCode: "Terminal size is too small for QR code; enlarge windows / set smaller font", size: 1}
+	qrMode := app.Settings.ViewerQRMode
+	title := ""
+	var cfg string
+	var err error
 
-	ip6 := cl.GetIP6(srv)
-	if ip6 != "" {
-		ip6 = " IP6 " + ip6
+	if cl != nil {
+		cfg, err = cl.GetPlainTextConfig(app.State.Server)
+		if err != nil {
+			cfg = "Error: " + err.Error()
+			qrEnabled = false
+			qrMode = false
+		}
+		title = "Peer \"" + cl.GetName() + "\" • IP4 " + cl.GetIP4(app.State.Server)
+		ip6 := cl.GetIP6(app.State.Server)
+		if ip6 != "" {
+			title += " • IP6 " + ip6
+		}
+	} else {
+		cfg = app.State.Server.GetInterfaceString()
+		qrMode = false
+		qrEnabled = false
+		title = "Server interface " + app.State.Server.Interface
+	}
+
+	qrs := make([]qr, 4)
+
+	if qrEnabled {
+		qrs[0] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.M, w) })
+		qrs[1] = qrGenerate(func(w io.Writer) { qrterminal.Generate(cfg, qrterminal.L, w) })
+		qrs[2] = qrGenerate(func(w io.Writer) { qrterminal.GenerateHalfBlock(cfg, qrterminal.L, w) })
+		qrs[3] = qr{qrCode: "Terminal size is too small for QR code; enlarge windows / set smaller font", size: 1}
 	}
 
 	return ViewPeer{
 		sSize:     sSize,
-		PeerName:  cl.GetName(),
-		PeerInfo:  "IP4 " + cl.GetIP4(srv) + ip6,
-		Config:    cfg,
+		title:     title,
+		config:    cfg,
 		qrEnabled: qrEnabled,
 		qrMode:    qrMode,
 		qrCodes:   qrs,
+		app:       app,
 	}
 }
 
@@ -78,9 +91,12 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, func() tea.Msg {
 				return TuiDialogMsgResult{}
 			}
+
 		case tea.KeyF9:
 			m.qrMode = !m.qrMode
-			qrPersist = m.qrMode
+
+			m.app.Settings.ViewerQRMode = m.qrMode
+			_ = m.app.SaveSettings()
 			return m, nil
 		}
 	}
@@ -100,7 +116,7 @@ func (m ViewPeer) View() string {
 	}
 	f10 := helpKey{key: "F10", help: "Close"}
 
-	config := m.Config
+	config := m.config
 	if m.qrMode {
 		for _, q := range m.qrCodes {
 			if q.size < m.sSize.Height-1 {
@@ -111,7 +127,7 @@ func (m ViewPeer) View() string {
 	}
 
 	return lipgloss.JoinVertical(0,
-		header.Render("Peer \""+m.PeerName+"\" • "+m.PeerInfo),
+		header.Render(m.title),
 		body.Render(config),
 		RenderHelpLine(m.sSize.Width, f9, f10),
 	)

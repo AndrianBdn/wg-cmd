@@ -6,7 +6,6 @@ import (
 	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"github.com/andrianbdn/wg-cmd/theme"
 	"github.com/andrianbdn/wg-cmd/tutils"
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"log"
@@ -14,30 +13,7 @@ import (
 	"os/exec"
 )
 
-// keyMap defines a set of keybindings. To work for help it must satisfy
-// key.Map. It could also very easily be a map[string]key.Binding.
-type keyMap struct {
-	NewPeer    key.Binding
-	DeletePeer key.Binding
-	Quit       key.Binding
-}
-
-// ShortHelp returns keybindings to be shown in the mini help view. It's part
-// of the key.Map interface.
-func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.NewPeer, k.DeletePeer, k.Quit}
-}
-
-// FullHelp returns keybindings for the expanded help view. It's part of the
-// key.Map interface.
-func (k keyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		{}, // first column
-		{}, // second column
-	}
-}
-
-type mainScreenTable struct {
+type MainScreen struct {
 	app   *app.App
 	sSize tea.WindowSizeMsg
 
@@ -50,30 +26,36 @@ type mainScreenTable struct {
 	reopenEditor bool
 }
 
-func newMainScreenTable(app *app.App, sSize tea.WindowSizeMsg) mainScreenTable {
+func NewMainScreen(app *app.App, sSize tea.WindowSizeMsg) MainScreen {
 	helpKeys := []helpKey{
-		helpKey{key: "F4", help: "Edit"},
-		helpKey{key: "F7", help: "Add Peer"},
-		helpKey{key: "F8", help: "Delete Peer"},
-		helpKey{key: "F10", help: "Quit"},
+		{key: "F4", help: "Edit"},
+		{key: "F7", help: "Add Peer"},
+		{key: "F8", help: "Delete Peer"},
+		{key: "F10", help: "Quit"},
 	}
 
-	return mainScreenTable{
+	m := MainScreen{
 		app:      app,
 		sSize:    sSize,
 		helpKeys: helpKeys,
-		table:    newAppDynamicTableList(app),
+		table:    newAppDynamicTableList(app, nil),
 	}
+	return m.SetSize(sSize)
 }
 
-func (m mainScreenTable) Init() tea.Cmd {
+func (m MainScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m MainScreen) SetSize(sSize tea.WindowSizeMsg) MainScreen {
+	m.sSize = sSize
+	m.table.SetTableSize(sSize, 0, -1)
+	return m
+}
+
+func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
-		m.sSize = msg
-		m.table.SetTableSize(msg, 0, -1)
+		m = m.SetSize(msg)
 	}
 
 	switch msg := msg.(type) {
@@ -126,20 +108,7 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.DeletePeer()
 
 		case tea.KeyEnter:
-			row := m.table.GetSelectedIndex()
-			if row == 0 {
-				m.dialog = NewTuiDialogMsg("Error", "Could not view server")
-				return m, m.dialog.Init()
-			}
-
-			p := clientFromRow(m.app, m.table.GetSelected())
-			if p == nil {
-				return m, nil
-			}
-
-			m.dialogFullScreen = true
-			m.dialog = NewViewPeer(m.sSize, m.app.State.Server, p)
-			return m, m.dialog.Init()
+			return m.ViewPeer()
 
 		case tea.KeyDown:
 			m.table.Down()
@@ -159,7 +128,7 @@ func (m mainScreenTable) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m mainScreenTable) View() string {
+func (m MainScreen) View() string {
 	mainScreen := lipgloss.JoinVertical(lipgloss.Left,
 		m.table.Render(),
 		RenderHelpLine(m.sSize.Width, m.helpKeys...),
@@ -169,18 +138,32 @@ func (m mainScreenTable) View() string {
 		if m.dialogFullScreen {
 			return m.dialog.View()
 		}
-
-		return tutils.PlaceDialog(m.dialog.View(), mainScreen, theme.Current.MainTableDimmed)
+		return tutils.PlaceDialog(m.dialog.View(), mainScreen, m.sSize, theme.Current.MainTableDimmed)
 	}
 
 	return mainScreen
 
 }
 
-func (m mainScreenTable) CreatePeer() (tea.Model, tea.Cmd) {
+func (m MainScreen) ViewPeer() (tea.Model, tea.Cmd) {
+	row := m.table.GetSelectedIndex()
+	var p *backend.Client
+	if row != 0 {
+		p = clientFromRow(m.app, m.table.GetSelected())
+		if p == nil {
+			return m, nil
+		}
+	}
+
+	m.dialogFullScreen = true
+	m.dialog = NewViewPeer(m.sSize, m.app, p)
+	return m, m.dialog.Init()
+}
+
+func (m MainScreen) CreatePeer() (tea.Model, tea.Cmd) {
 	d := NewTuiDialogName()
 	d.Title = "Create a new Peer"
-	d.Question = "Enter new peer name"
+	d.Question = "Enter a new peer name"
 	d.ValidationFunc = func(s string) string {
 		if s == "" {
 			return "cannot be empty"
@@ -195,7 +178,7 @@ func (m mainScreenTable) CreatePeer() (tea.Model, tea.Cmd) {
 	return m, d.Init()
 }
 
-func (m mainScreenTable) DeletePeer() (tea.Model, tea.Cmd) {
+func (m MainScreen) DeletePeer() (tea.Model, tea.Cmd) {
 	row := m.table.GetSelectedIndex()
 	if row == 0 {
 		m.dialog = NewTuiDialogMsg("Error", "Could not delete server")
@@ -211,7 +194,7 @@ func (m mainScreenTable) DeletePeer() (tea.Model, tea.Cmd) {
 	return m, m.dialog.Init()
 }
 
-func (m mainScreenTable) ReallyAddPeer(name string) mainScreenTable {
+func (m MainScreen) ReallyAddPeer(name string) MainScreen {
 	err := m.app.State.AddPeer(name)
 	if err != nil {
 		log.Println("Error adding peer", err)
@@ -220,11 +203,11 @@ func (m mainScreenTable) ReallyAddPeer(name string) mainScreenTable {
 		_ = m.app.GenerateWireguardConfig()
 	}
 	m.dialog = nil
-	m.table = newAppDynamicTableList(m.app)
+	m.table = newAppDynamicTableList(m.app, &m.table)
 	return m
 }
 
-func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
+func (m MainScreen) ReallyDeletePeer() MainScreen {
 	row := m.table.GetSelectedIndex()
 	if row == 0 {
 		panic("we don't delete server")
@@ -246,7 +229,7 @@ func (m mainScreenTable) ReallyDeletePeer() mainScreenTable {
 	return m
 }
 
-func (m mainScreenTable) EditCurrentItem() mainScreenTable {
+func (m MainScreen) EditCurrentItem() MainScreen {
 	file := ""
 	if m.table.GetSelectedIndex() == 0 {
 		file = backend.ServerFileName

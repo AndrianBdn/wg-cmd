@@ -53,3 +53,10 @@ func netToServerIP4(ip4 string) string {
 func netToServerIP6(ip4 string) string {
 	return strings.ReplaceAll(ip4, "::0/", "::1/")
 }
+
+func concatIfNotEmpty(str string, add string) string {
+	if str != "" {
+		return str + add
+	}
+	return str
+}
