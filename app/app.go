@@ -113,7 +113,7 @@ func testIfDirWritable(dir string) string {
 
 	err := os.WriteFile(testFile, []byte(testFileName), 0600)
 	if err != nil {
-		return fmt.Sprint("can't write file in ", dir, " ", err.Error())
+		return fmt.Sprint("can't write file in ", dir, ":", err.Error())
 	}
 
 	rtest, err := os.ReadFile(testFile)

@@ -102,7 +102,7 @@ func (m endpointScreen) View() string {
 
 	top := lipgloss.JoinVertical(0,
 		s.header(),
-		s.xText.Render("The Setup will attempt to discover this computer external IPv4 address.\n"),
+		s.xText.Render("The Setup will attempt to discover this computer's external IPv4 address.\n"),
 	)
 
 	if m.state == stateInit {

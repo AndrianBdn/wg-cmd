@@ -105,6 +105,21 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if _, ok := msg.(doneScreenResult); ok {
 		m.currentModel = nil
+
+		if sysinfo.IsRoot() && (needNatConfigurationChange(m.blueprint) || sysinfo.HasSystemd()) {
+			// extra step to check NAT and setup systemd
+			rootLinux := newLinuxMoreScreen(m.app, m.sSize, m.blueprint)
+			m.currentModel = rootLinux
+			return m, rootLinux.Init()
+		}
+
+		return m, func() tea.Msg {
+			return Done{InterfaceName: m.blueprint.InterfaceName}
+		}
+	}
+
+	if _, ok := msg.(linuxMoreDone); ok {
+		m.currentModel = nil
 		return m, func() tea.Msg {
 			return Done{InterfaceName: m.blueprint.InterfaceName}
 		}
@@ -162,4 +177,18 @@ func (m RootModel) presentDNSDialog() (tea.Model, tea.Cmd) {
 
 	m.currentModel = optStep
 	return m, optStep.Init()
+}
+
+func needNatConfigurationChange(b backend.ServerBlueprint) bool {
+	if b.Nat4 {
+		if sysinfo.NatEnabledIPv4() == false {
+			return true
+		}
+	}
+	if b.Nat6 {
+		if sysinfo.NatEnabledIPv6() == false {
+			return true
+		}
+	}
+	return false
 }
