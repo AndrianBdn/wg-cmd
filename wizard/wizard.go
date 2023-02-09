@@ -24,9 +24,15 @@ type RootModel struct {
 }
 
 func NewRootModel(app *app.App) RootModel {
+	ok, noDepsScreen := newNoDepsScreen(app, tea.WindowSizeMsg{})
+
 	m := RootModel{}
 	m.app = app
-	m.currentModel = newWelcomeDirTestScreen(app, tea.WindowSizeMsg{})
+	if !ok {
+		m.currentModel = noDepsScreen
+		return m
+	}
+	m.currentModel = newWelcomeScreen(app, tea.WindowSizeMsg{})
 	return m
 }
 
@@ -42,7 +48,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sSize = msg
 	}
 
-	if _, ok := msg.(welcomeDirTestResult); ok {
+	if _, ok := msg.(welcomeScreenResult); ok {
 		m.currentModel = newInterfaceScreen(m.app, m.sSize)
 		return m, m.currentModel.Init()
 	}

@@ -27,3 +27,7 @@ func HasSystemd() bool {
 func CreateSystemdStuff(iface, wgdir string) error {
 	return errors.New("not implemented")
 }
+
+func HasIPTables() bool {
+	return false
+}

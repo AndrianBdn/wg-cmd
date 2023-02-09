@@ -7,27 +7,27 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type welcomeDirTestResult struct{}
+type welcomeScreenResult struct{}
 
-type welcomeDirTestScreen struct {
+type welcomeScreen struct {
 	app      *app.App
 	sSize    tea.WindowSizeMsg
 	dirError string
 	testDone bool
 }
 
-func newWelcomeDirTestScreen(app *app.App, sSize tea.WindowSizeMsg) welcomeDirTestScreen {
-	return welcomeDirTestScreen{
+func newWelcomeScreen(app *app.App, sSize tea.WindowSizeMsg) welcomeScreen {
+	return welcomeScreen{
 		app:   app,
 		sSize: sSize,
 	}
 }
 
-func (m welcomeDirTestScreen) Init() tea.Cmd {
+func (m welcomeScreen) Init() tea.Cmd {
 	return nil
 }
 
-func (m welcomeDirTestScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m welcomeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if msg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.sSize = msg
 		return m, nil
@@ -51,7 +51,7 @@ func (m welcomeDirTestScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, tea.Quit
 				} else {
 					return m, func() tea.Msg {
-						return welcomeDirTestResult{}
+						return welcomeScreenResult{}
 					}
 				}
 
@@ -64,7 +64,7 @@ func (m welcomeDirTestScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m welcomeDirTestScreen) View() string {
+func (m welcomeScreen) View() string {
 	s := newStyleSize(m.sSize)
 
 	dynamicBlock := s.xText.Render("")
@@ -73,7 +73,7 @@ func (m welcomeDirTestScreen) View() string {
 			s.xText.Render("Error: "+lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render(m.dirError)+"\n"),
 			s.xText.Render("Usually it happens because WireGuard(R) directories "+
 				"are not accessible by current user.\n"),
-			s.xText.Render("Press ENTER to quit. You can try resolving the problem by using sudo."),
+			s.xText.Render("Press ENTER to quit. You may try resolving the problem by using sudo."),
 		)
 	} else {
 		if !m.testDone {
@@ -90,6 +90,11 @@ func (m welcomeDirTestScreen) View() string {
 
 	}
 
+	dir := m.app.Settings.WireguardDir
+	if m.app.Settings.DatabaseDir == m.app.Settings.WireguardDir {
+		dir = "the same directory"
+	}
+
 	top := lipgloss.JoinVertical(0,
 		s.header(),
 		s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Welcome to Setup.")),
@@ -97,7 +102,7 @@ func (m welcomeDirTestScreen) View() string {
 		s.xText.Render("Before configuring WireGuard(R) interface the Setup needs to check prerequisites.\n"),
 		s.xText.Render("WG Commander uses "+m.app.Settings.DatabaseDir+" to store interface settings. "+
 			"In addition generated "+
-			"WireGuard(R) configuration files will be placed to "+m.app.Settings.WireguardDir),
+			"WireGuard(R) configuration files will be placed to "+dir),
 
 		s.xText.Render("\nThe Setup will test if these directories are writable.\n "),
 

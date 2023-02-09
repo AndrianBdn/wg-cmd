@@ -83,17 +83,11 @@ func fileIs1(path string) bool {
 }
 
 func sysctlPath() string {
-	path, err := exec.LookPath("sysctl")
-	if err == nil {
-		return path
-	}
-	candidates := []string{"/usr/sbin/sysctl", "/sbin/sysctl"}
-	for _, candidate := range candidates {
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
-		}
-	}
-	return ""
+	return binPath("sysctl")
+}
+
+func HasIPTables() bool {
+	return binPath("iptables") != ""
 }
 
 func pathNameForInterface(iface string) string {
@@ -149,6 +143,18 @@ func reloadAndEnableSystemdStuff(iface string) error {
 		return fmt.Errorf("failed to reload systemd: %w", err)
 	}
 
+	// systemctl enable && start wg-quick@<iface>.service
+	wgqSrv := "wg-quick@" + iface + ".service"
+	cmd = exec.Command("systemctl", "enable", wgqSrv)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to enable %s: %w", wgqSrv, err)
+	}
+
+	cmd = exec.Command("systemctl", "start", wgqSrv)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to start %s: %w", wgqSrv, err)
+	}
+
 	// systemctl enable wgc-<iface>-restart.service
 	cmd = exec.Command("systemctl", "enable", pathName, targetServiceName)
 	stdout := &bytes.Buffer{}
@@ -167,18 +173,7 @@ func reloadAndEnableSystemdStuff(iface string) error {
 	cmd = exec.Command("systemctl", "start", pathName, targetServiceName)
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("failed to start %s: %w", pathName, targetServiceName, err)
-	}
-
-	wgqSrv := "wg-quick@" + iface + ".service"
-	cmd = exec.Command("systemctl", "enable", wgqSrv)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to enable %s: %w", wgqSrv, err)
-	}
-
-	cmd = exec.Command("systemctl", "start", wgqSrv)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to start %s: %w", wgqSrv, err)
+		return fmt.Errorf("failed to start %s,%s: %w", pathName, targetServiceName, err)
 	}
 
 	return nil
