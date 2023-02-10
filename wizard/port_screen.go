@@ -12,9 +12,8 @@ import (
 type portStepResult uint16
 
 type portScreen struct {
-	sSize  tea.WindowSizeMsg
-	port   uint16
-	errMsg string
+	sSize tea.WindowSizeMsg
+	port  uint16
 }
 
 func newPortScreen(sSize tea.WindowSizeMsg) portScreen {

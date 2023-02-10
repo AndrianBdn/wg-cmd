@@ -123,7 +123,7 @@ func (m linuxMoreScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m linuxMoreScreen) View() string {
 	s := newStyleSize(m.sSize)
 
-	dynamicBlock := s.xText.Render("")
+	dynamicBlock := ""
 	if m.lastError != "" {
 		dynamicBlock = lipgloss.JoinVertical(0,
 			s.xText.Render("Error: "+lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render(m.lastError)+"\n"),

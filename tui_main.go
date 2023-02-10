@@ -264,7 +264,7 @@ func (m MainScreen) EditCurrentItem() MainScreen {
 		m.dialog = NewTuiDialogMsg("Error", "Cannot start editor: "+err.Error(), true)
 		return m
 	}
-	err = cmd.Wait()
+	_ = cmd.Wait()
 	err = m.app.LoadInterface(m.app.State.Server.Interface)
 
 	if err != nil {

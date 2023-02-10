@@ -16,11 +16,10 @@ type Done struct {
 }
 
 type RootModel struct {
-	app           *app.App
-	stepInterface interfaceScreen
-	currentModel  tea.Model
-	blueprint     backend.ServerBlueprint
-	sSize         tea.WindowSizeMsg
+	app          *app.App
+	currentModel tea.Model
+	blueprint    backend.ServerBlueprint
+	sSize        tea.WindowSizeMsg
 }
 
 func NewRootModel(app *app.App) RootModel {
@@ -153,7 +152,7 @@ func (m RootModel) presentNatDialog() (tea.Model, tea.Cmd) {
 		{"no", "Skip NAT, only setup basic networking"},
 	}
 
-	if sysinfo.HasIP6() == false || m.blueprint.Net6 == "" {
+	if !sysinfo.HasIP6() || m.blueprint.Net6 == "" {
 		opts = opts[1:]
 	}
 
@@ -187,12 +186,12 @@ func (m RootModel) presentDNSDialog() (tea.Model, tea.Cmd) {
 
 func needNatConfigurationChange(b backend.ServerBlueprint) bool {
 	if b.Nat4 {
-		if sysinfo.NatEnabledIPv4() == false {
+		if !sysinfo.NatEnabledIPv4() {
 			return true
 		}
 	}
 	if b.Nat6 {
-		if sysinfo.NatEnabledIPv6() == false {
+		if !sysinfo.NatEnabledIPv6() {
 			return true
 		}
 	}

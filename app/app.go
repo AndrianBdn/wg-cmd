@@ -104,7 +104,7 @@ func (a *App) ValidateIfaceArg(ifName string) string {
 	}
 
 	if sysinfo.NetworkInterfaceExists(ifName) {
-		return fmt.Sprintf("Network interface exists in routing tables. Try a different name.")
+		return "Network interface exists in routing tables. Try a different name."
 	}
 
 	return ""

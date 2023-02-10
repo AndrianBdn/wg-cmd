@@ -102,8 +102,6 @@ func (s *State) GenerateWireguardFile(wgConfigPath string, backup bool) error {
 			if err != nil {
 				return fmt.Errorf("creating .bak file: %w", err)
 			}
-		} else {
-			// WriteFile will override
 		}
 	}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
 	"log"
@@ -24,19 +23,19 @@ func stringRowsFromApp(app *app.App) [][]string {
 
 	sort.Ints(keys)
 
-	kkk := 1
 	for j := 0; j < 1; j++ {
 		for _, k := range keys {
 			cl := app.State.Clients[k]
 			if cl == nil {
 				continue
 			}
-			// cl.GetIPNumberString()
-			kkk++
-			fake := fmt.Sprintf("%04d", kkk)
-			fake = cl.GetIPNumberString()
 
-			rows = append(rows, []string{fake, cl.GetName(), cl.GetIP4(app.State.Server), cl.GetIP6(app.State.Server)})
+			rows = append(rows, []string{
+				cl.GetIPNumberString(),
+				cl.GetName(),
+				cl.GetIP4(app.State.Server),
+				cl.GetIP6(app.State.Server),
+			})
 		}
 	}
 
