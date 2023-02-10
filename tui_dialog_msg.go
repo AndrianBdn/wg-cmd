@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andrianbdn/wg-cmd/theme"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -10,10 +11,11 @@ type TuiDialogMsgResult struct{}
 type TuiDialogMsg struct {
 	Title   string
 	Message string
+	IsError bool
 }
 
-func NewTuiDialogMsg(title, message string) TuiDialogMsg {
-	return TuiDialogMsg{Title: title, Message: message}
+func NewTuiDialogMsg(title, message string, isError bool) TuiDialogMsg {
+	return TuiDialogMsg{Title: title, Message: message, IsError: isError}
 }
 
 func (m TuiDialogMsg) Init() tea.Cmd {
@@ -36,7 +38,26 @@ func (m TuiDialogMsg) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m TuiDialogMsg) View() string {
-	return ErrorView(m.Title, m.Message)
+	if m.IsError {
+		return ErrorView(m.Title, m.Message)
+	} else {
+		return InfoView(m.Title, m.Message)
+	}
+}
+
+func InfoView(title, message string) string {
+
+	frameStyle := theme.Current.DialogBackground.Copy().Width(44).Padding(1, 2)
+	titleStyle := theme.Current.DialogTitle.Copy().Width(40).Align(lipgloss.Left)
+	msgStyle := theme.Current.DialogBackground.Copy().Width(40).Align(lipgloss.Left).Padding(1, 0, 0, 0)
+
+	return frameStyle.Render(
+		lipgloss.JoinVertical(0,
+			titleStyle.Render(title),
+			msgStyle.Render(message),
+		),
+	)
+
 }
 
 func ErrorView(title, message string) string {

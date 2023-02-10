@@ -5,6 +5,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
 	"os"
+	"strings"
 )
 
 type Settings struct {
@@ -12,6 +13,8 @@ type Settings struct {
 	DatabaseDir      string
 	DefaultInterface string
 	ViewerQRMode     bool
+
+	cliCommand string
 }
 
 func readSettings() (*Settings, error) {
@@ -66,5 +69,30 @@ func defaultSettings() Settings {
 	return Settings{
 		WireguardDir: dd,
 		DatabaseDir:  dd,
+	}
+}
+
+func (s *Settings) applyCommandLine() {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		return
+	}
+
+	arg := args[0]
+	if arg == "make" {
+		s.cliCommand = "make"
+		return
+	}
+
+	if arg == "new" {
+		arg = ""
+	} else if strings.HasPrefix(arg, "wgc-") {
+		arg = strings.Replace(arg, "wgc-", "", 1)
+	}
+
+	s.DefaultInterface = arg
+
+	if len(args) > 1 && args[1] == "make" {
+		s.cliCommand = "make"
 	}
 }

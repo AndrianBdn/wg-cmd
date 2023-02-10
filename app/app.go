@@ -27,16 +27,38 @@ func NewApp() *App {
 		os.Exit(1)
 	}
 
+	settings.applyCommandLine()
+
 	a := App{
 		Settings: settings,
 	}
 
+	log.Println("Loading interface", a.Settings.DefaultInterface)
 	err = a.LoadInterface(a.Settings.DefaultInterface)
+	log.Println("error", err, "state", a.State != nil)
+
 	if err != nil {
-		panic(err)
+		fmt.Printf("Unable to load interface %s: %s\n", a.Settings.DefaultInterface, err)
+		fmt.Println("To troubleshoot:")
+		fmt.Printf("1. Check if %s exists\n", a.interfaceDir(a.Settings.DefaultInterface))
+		fmt.Printf("2. Launch \"%s new\"  to create new interface\n", os.Args[0])
+		os.Exit(1)
 	}
 
 	return &a
+}
+
+func (a *App) RunCli() {
+	// we currently only support "make" command to rebuild Wireguard config
+	if a.Settings.cliCommand == "make" {
+		path, err := a.GenerateWireguardConfig()
+		if err != nil {
+			fmt.Println("Error making Wireguard config:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Successfuly wrote Wireguard config to %s\n", path)
+		os.Exit(0)
+	}
 }
 
 func (a *App) LoadInterface(ifName string) error {
@@ -45,7 +67,7 @@ func (a *App) LoadInterface(ifName string) error {
 	}
 	p := a.interfaceDir(ifName)
 	if _, err := os.Stat(p); err != nil {
-		return nil
+		return err
 	}
 	err := os.Chdir(p)
 	if err != nil {
@@ -59,9 +81,9 @@ func (a *App) LoadInterface(ifName string) error {
 	return err
 }
 
-func (a *App) GenerateWireguardConfig() error {
+func (a *App) GenerateWireguardConfig() (string, error) {
 	configPath := filepath.Join(a.Settings.WireguardDir, a.State.Server.Interface) + ".conf"
-	return a.State.GenerateWireguardFile(configPath, false)
+	return configPath, a.State.GenerateWireguardFile(configPath, false)
 }
 
 func (a *App) ValidateIfaceArg(ifName string) string {

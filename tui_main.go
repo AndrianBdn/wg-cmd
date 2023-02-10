@@ -28,6 +28,7 @@ type MainScreen struct {
 
 func NewMainScreen(app *app.App, sSize tea.WindowSizeMsg) MainScreen {
 	helpKeys := []helpKey{
+		{key: "F1", help: "Help"},
 		{key: "F4", help: "Edit"},
 		{key: "F7", help: "Add Peer"},
 		{key: "F8", help: "Delete Peer"},
@@ -95,6 +96,9 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.Type {
 
+		case tea.KeyF1:
+			return m.Help()
+
 		case tea.KeyF4:
 			return m.EditCurrentItem(), tea.ClearScreen
 
@@ -121,10 +125,9 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyPgDown:
 			m.table.PageDown()
-
 		}
 	}
-	//m.table, cmd = m.table.
+
 	return m, cmd
 }
 
@@ -181,7 +184,7 @@ func (m MainScreen) CreatePeer() (tea.Model, tea.Cmd) {
 func (m MainScreen) DeletePeer() (tea.Model, tea.Cmd) {
 	row := m.table.GetSelectedIndex()
 	if row == 0 {
-		m.dialog = NewTuiDialogMsg("Error", "Could not delete server")
+		m.dialog = NewTuiDialogMsg("Error", "Deleting the server is currently not supported", true)
 		return m, m.dialog.Init()
 	}
 
@@ -200,7 +203,10 @@ func (m MainScreen) ReallyAddPeer(name string) MainScreen {
 		log.Println("Error adding peer", err)
 	}
 	if err == nil {
-		_ = m.app.GenerateWireguardConfig()
+		_, err = m.app.GenerateWireguardConfig()
+		if err != nil {
+			log.Println("Error generating config", err)
+		}
 	}
 	m.dialog = nil
 	m.table = newAppDynamicTableList(m.app, &m.table)
@@ -220,7 +226,10 @@ func (m MainScreen) ReallyDeletePeer() MainScreen {
 			log.Println("Error deleting peer", err)
 		}
 		if err == nil {
-			_ = m.app.GenerateWireguardConfig()
+			_, err = m.app.GenerateWireguardConfig()
+			if err != nil {
+				log.Println("Error generating config", err)
+			}
 		}
 
 		m.table.DeleteSelectedRow()
@@ -242,7 +251,7 @@ func (m MainScreen) EditCurrentItem() MainScreen {
 
 	editor := sysinfo.GetSystemEditorPath()
 	if editor == "" {
-		m.dialog = NewTuiDialogMsg("Error", "Cannot find any editor")
+		m.dialog = NewTuiDialogMsg("Error", "Cannot find any editor", true)
 		return m
 	}
 
@@ -252,18 +261,37 @@ func (m MainScreen) EditCurrentItem() MainScreen {
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
-		m.dialog = NewTuiDialogMsg("Error", "Cannot start editor: "+err.Error())
+		m.dialog = NewTuiDialogMsg("Error", "Cannot start editor: "+err.Error(), true)
 		return m
 	}
 	err = cmd.Wait()
 	err = m.app.LoadInterface(m.app.State.Server.Interface)
 
 	if err != nil {
-		m.dialog = NewTuiDialogMsg("Error", "Error reloading state: "+err.Error()+". Edit file to fix the problem.")
+		m.dialog = NewTuiDialogMsg(
+			"Error",
+			"Error reloading state: "+err.Error()+". Edit file to fix the problem.",
+			true)
 		m.reopenEditor = true
 		return m
 	}
 	m.reopenEditor = false
 
 	return m
+}
+
+func (m MainScreen) Help() (tea.Model, tea.Cmd) {
+	ver := version
+	if ver == "" {
+		ver = "<not set>"
+	}
+
+	m.dialog = NewTuiDialogMsg(
+		"WG Commander",
+		"version "+ver+"\n\n(c) 2023 by Andrian Budantsov\n\n"+
+			theme.Current.DialogButtonFocus.Render("https://github.com/andrianbdn/wg-cmd")+
+			"\n\n"+
+			"Comes with ABSOLUTELY NO WARRANTY, distributed under the terms of\nthe MIT license.",
+		false)
+	return m, m.dialog.Init()
 }
