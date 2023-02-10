@@ -27,7 +27,6 @@ type ServerBlueprint struct {
 
 type Server struct {
 	Interface                 string
-	ServerConfigPath          string
 	Address4                  string
 	Address6                  string
 	PresharedKey              string
@@ -62,7 +61,6 @@ func NewServerWithBlueprint(b ServerBlueprint) *Server {
 		s.Address6 = netToServerIP6(b.Net6)
 	}
 	s.Interface = b.InterfaceName
-	s.ServerConfigPath = "/etc/wireguard/" + b.InterfaceName + ".conf"
 	s.ListenPort = b.Port
 	key, err := wgtypes.GenerateKey()
 	if err != nil {
