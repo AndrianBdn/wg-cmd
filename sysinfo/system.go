@@ -24,5 +24,8 @@ func binPath(binary string) string {
 }
 
 func HasWireguard() bool {
+	if os.Getenv("WGCMD_NO_DEPS") != "" {
+		return true
+	}
 	return binPath("wg") != ""
 }

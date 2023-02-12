@@ -58,7 +58,8 @@ func (m noDepsScreen) View() string {
 	}
 
 	if !m.hasIPTables {
-		missing = lipgloss.JoinVertical(lipgloss.Left,
+
+		missing = tutils.JoinVerticalNonEmpty(lipgloss.Left,
 			missing,
 			s.xList.Render("•  iptables (ip6tables)\n"),
 		)

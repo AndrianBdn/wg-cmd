@@ -19,3 +19,14 @@ func HPad(b string, sHeight int, s lipgloss.Style) string {
 	}
 	return b
 }
+
+func JoinVerticalNonEmpty(pos lipgloss.Position, strs ...string) string {
+	var nonEmpty []string
+	for _, s := range strs {
+		if s != "" {
+			nonEmpty = append(nonEmpty, s)
+		}
+	}
+
+	return lipgloss.JoinVertical(pos, nonEmpty...)
+}

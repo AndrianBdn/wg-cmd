@@ -2,7 +2,10 @@
 
 package sysinfo
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 func HasSysctl() bool {
 	return false
@@ -29,5 +32,8 @@ func CreateSystemdStuff(iface, wgdir string) error {
 }
 
 func HasIPTables() bool {
+	if os.Getenv("WGCMD_NO_DEPS") != "" {
+		return true
+	}
 	return false
 }

@@ -87,6 +87,9 @@ func sysctlPath() string {
 }
 
 func HasIPTables() bool {
+	if os.Getenv("WGCMD_NO_DEPS") != "" {
+		return true
+	}
 	return binPath("iptables") != ""
 }
 

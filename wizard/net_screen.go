@@ -105,7 +105,7 @@ func (m netScreen) View() string {
 		s.xText.Render("Note: only /20 and /64 networks are supported at the moment. "+
 			"Make sure there are no collisions. \n"),
 
-		s.xTooltip.Render("ENTER=Continue"),
+		s.xTooltip.Render("ENTER=Continue 4=New IPv4 6=New IPv6 ^=Toggle IPv6"),
 	)
 
 	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Copy().Width(m.sSize.Width))
