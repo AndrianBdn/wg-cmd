@@ -8,7 +8,7 @@ import (
 )
 
 func configureLogger() {
-	if os.Getenv("WGCMD_DEBUG_LOG") == "" {
+	if os.Getenv("WG_CMD_DEBUG_LOG") == "" {
 		log.SetOutput(io.Discard)
 		return
 	}

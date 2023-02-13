@@ -62,7 +62,7 @@ func (a *App) SaveSettings() error {
 }
 
 func defaultSettings() Settings {
-	dd := os.Getenv("DEBUG_WG_CMD_DIR")
+	dd := os.Getenv("WG_CMD_DIR")
 
 	if dd == "" {
 		dd = "/etc/wireguard"
