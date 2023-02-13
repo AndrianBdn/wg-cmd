@@ -1,0 +1,67 @@
+[Interface]
+Address = 10.72.144.1/20
+Address = fd7b:7e45:5bf7::1/64
+PostUp = iptables -A FORWARD -i wg3 -j ACCEPT; iptables -t nat -A POSTROUTING -o unknown0 -j MASQUERADE; 
+PostDown = iptables -D FORWARD -i wg3 -j ACCEPT; iptables -t nat -D POSTROUTING -o unknown0 -j MASQUERADE; 
+ListenPort = 51820
+PrivateKey = 2MAgN/1+w/8Ndy/nZ7CC/fLUrNHqEaM0IZVtgYe9aUo=
+
+# peer alice
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = AqJYjNQo7+nRnnefzysctzUjD8wQxrSCcmqs75eGkTs=
+AllowedIPs = 10.72.144.2/32, fd7b:7e45:5bf7::0002/128
+
+# peer cheshire_cat
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = rqqDTe170dn7JYdqvrI4eadbEFPsXlmfYU+Ko8PGeTA=
+AllowedIPs = 10.72.144.3/32, fd7b:7e45:5bf7::0003/128
+
+# peer white_rabbit
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = LdrUWOpGzuT+zkT2Y1Uqim1QQLaAf8uHRfizE2T+mAc=
+AllowedIPs = 10.72.144.4/32, fd7b:7e45:5bf7::0004/128
+
+# peer duchess
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = L9Tf4Mki61TS57ZDlHAfbTeKr4MJ9bj4CKFF8YuCIVk=
+AllowedIPs = 10.72.144.5/32, fd7b:7e45:5bf7::0005/128
+
+# peer queen_of_hearts
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = rmaTUmILAWXe5YnZpa4GbAqmvivrad0hnqCsh/wj4k0=
+AllowedIPs = 10.72.144.6/32, fd7b:7e45:5bf7::0006/128
+
+# peer hatter
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = uatTu2GZhZAEBlB/NmtG3yvx/3OSX168i0E6URmmVzg=
+AllowedIPs = 10.72.144.7/32, fd7b:7e45:5bf7::0007/128
+
+# peer caterpillar
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = RMrVHsWWziTbbZOhNYb0Q2fJbBDLUrYu4fUU1MB67Eo=
+AllowedIPs = 10.72.144.8/32, fd7b:7e45:5bf7::0008/128
+
+# peer dormouse
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = g2LvXHGXsZEPWJbaUvdnHB6O+09Y09mGQK7nq+fYn0k=
+AllowedIPs = 10.72.144.9/32, fd7b:7e45:5bf7::0009/128
+
+# peer butterfly
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = Xr/BwvGh3jbuCCiORxAOF3DWACnomKFDcaH8m+jGP3k=
+AllowedIPs = 10.72.144.10/32, fd7b:7e45:5bf7::000a/128
+
+# peer dodo
+[Peer]
+PresharedKey = 2aBQGV4S9nBxcICjlPABIvSG6zCIHNFjwO3l1k6XMkE=
+PublicKey = /0jlhJqSAHXnFo4tHDHxLkF/HC64dGegsdVu6ct+DWY=
+AllowedIPs = 10.72.144.11/32, fd7b:7e45:5bf7::000b/128

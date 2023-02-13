@@ -18,13 +18,8 @@ func (a *App) CreateNewServer(b backend.ServerBlueprint) error {
 		return fmt.Errorf("can't create %s:%w", p, err)
 	}
 
-	err = os.Chdir(p)
-	if err != nil {
-		return fmt.Errorf("can't chdir %s:%w", p, err)
-	}
-
 	server := backend.NewServerWithBlueprint(b)
-	err = server.WriteOnce()
+	err = server.WriteOnce(p)
 	if err != nil {
 		return fmt.Errorf("server write %w", err)
 	}

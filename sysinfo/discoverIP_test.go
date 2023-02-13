@@ -2,11 +2,15 @@ package sysinfo
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
-// Warning: this test goes to the Internet, actually we test that IP discovery ipDiscoveryServices still work
 func TestDiscoverIP(t *testing.T) {
+	if os.Getenv("WG_TEST_HTTP") == "" {
+		t.Skip("Skipping test that goes to the Internet")
+	}
+
 	for _, service := range ipDiscoveryServices {
 		if service == "" {
 			continue

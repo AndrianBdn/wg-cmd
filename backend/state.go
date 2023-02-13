@@ -7,12 +7,14 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 )
 
 const PeerNameRegExp = `([A-Za-z][0-9A-Za-z-_]*)`
 
 type State struct {
+	dir     string
 	Server  *Server
 	Clients map[int]*Client
 }
@@ -30,7 +32,8 @@ func (s *State) CanAddPeer(peerName string) (int, error) {
 	}
 
 	foundIP := -1
-	for i := 2; i < 4096; i++ {
+	// last IP is a broadcast address
+	for i := 2; i < 4095; i++ {
 		if _, ok := s.Clients[i]; !ok {
 			foundIP = i
 			break
@@ -51,7 +54,7 @@ func (s *State) AddPeer(peerName string) error {
 	}
 
 	c := NewClient(foundIP, peerName)
-	err = c.WriteOnce()
+	err = c.WriteOnce(s.dir)
 	if err != nil {
 		return fmt.Errorf("can't write %s: %w", c.GetFileName(), err)
 	}
@@ -70,10 +73,7 @@ func (s *State) DeletePeer(idx int) error {
 		return fmt.Errorf("peer not found")
 	}
 
-	log.Printf("%+v", cl)
-	log.Println(cl.GetFileName())
-
-	err := os.Remove(cl.GetFileName())
+	err := os.Remove(filepath.Join(s.dir, cl.GetFileName()))
 	if err != nil {
 		return fmt.Errorf("can't remove %w", err)
 	}
@@ -83,7 +83,7 @@ func (s *State) DeletePeer(idx int) error {
 
 func (s *State) GenerateWireguardFile(wgConfigPath string, backup bool) error {
 	buf := bytes.NewBuffer(nil)
-	err := generateWireguardConfig(s, buf)
+	err := s.generateWireguardConfig(buf)
 	if err != nil {
 		return fmt.Errorf("server config generation: %w", err)
 	}
@@ -112,6 +112,26 @@ func (s *State) GenerateWireguardFile(wgConfigPath string, backup bool) error {
 	return nil
 }
 
+func (s *State) IterateClients(f func(*Client) error) error {
+	keys := make([]int, len(s.Clients))
+	i := 0
+	for k := range s.Clients {
+		keys[i] = k
+		i++
+	}
+
+	sort.Ints(keys)
+
+	for _, k := range keys {
+		err := f(s.Clients[k])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func ReadState(dir string, wlog *log.Logger) (*State, error) {
 	if _, err := os.Stat(filepath.Join(dir, ServerFileName)); os.IsNotExist(err) {
 		return nil, fmt.Errorf("cannot find %s in wgcmd interface directory %s", ServerFileName, dir)
@@ -122,7 +142,7 @@ func ReadState(dir string, wlog *log.Logger) (*State, error) {
 		return nil, fmt.Errorf("unable to list files in %s directory: %w", dir, err)
 	}
 
-	srv, err := ReadServer()
+	srv, err := readServer(dir)
 	if err != nil {
 		return nil, fmt.Errorf("can't read %s error: %w", ServerFileName, err)
 	}
@@ -147,7 +167,7 @@ func ReadState(dir string, wlog *log.Logger) (*State, error) {
 			panic("unlikely logical error - number from regexp cannot be parsed")
 		}
 		if ip > 4094 {
-			return nil, fmt.Errorf("at the moment wg-dir-conf only supports 4094 peers (/20 subnet)")
+			return nil, fmt.Errorf("at the moment wg-cmd only supports 4094 peers (/20 subnet)")
 		}
 		if _, ok := cls[ip]; ok {
 			return nil, fmt.Errorf("conflicting files %s and %s", f.Name(), cls[ip].fileName)
@@ -162,5 +182,5 @@ func ReadState(dir string, wlog *log.Logger) (*State, error) {
 		cls[ip] = client
 	}
 
-	return &State{Server: srv, Clients: cls}, nil
+	return &State{dir: dir, Server: srv, Clients: cls}, nil
 }

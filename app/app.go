@@ -70,11 +70,6 @@ func (a *App) LoadInterface(ifName string) error {
 	if _, err := os.Stat(p); err != nil {
 		return err
 	}
-	err := os.Chdir(p)
-	if err != nil {
-		return fmt.Errorf("can't chdir %s:%w", p, err)
-	}
-
 	state, err := backend.ReadState(p, log.New(io.Discard, "", 0))
 	if err == nil {
 		a.State = state

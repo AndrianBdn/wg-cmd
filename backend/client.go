@@ -45,8 +45,8 @@ func NewClient(ip int, name string) *Client {
 	return &c
 }
 
-func (c *Client) WriteOnce() error {
-	f, err := os.OpenFile(c.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
+func (c *Client) WriteOnce(dir string) error {
+	f, err := os.OpenFile(filepath.Join(dir, c.fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("Client.WriteOnce, can't create %s file %w", c.fileName, err)
@@ -108,10 +108,10 @@ func (c *Client) GetIPNumberString() string {
 
 func (c *Client) GetPlainTextConfig(srv *Server) (string, error) {
 	buf := bytes.NewBuffer(nil)
-	err := GenerateClientConfig(srv, c, buf)
+	err := c.generateClientConfig(srv, buf)
 	if err != nil {
 		return "", fmt.Errorf("generate client config %w", err)
 	}
 
-	return buf.String() + "\n", nil
+	return buf.String(), nil
 }

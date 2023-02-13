@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sort"
 	"strconv"
 
 	"github.com/andrianbdn/wg-cmd/app"
@@ -16,30 +15,18 @@ func stringRowsFromApp(app *app.App) [][]string {
 		app.State.Server.Address4, app.State.Server.Address6,
 	})
 
-	keys := make([]int, len(app.State.Clients))
+	err := app.State.IterateClients(func(cl *backend.Client) error {
+		rows = append(rows, []string{
+			cl.GetIPNumberString(),
+			cl.GetName(),
+			cl.GetIP4(app.State.Server),
+			cl.GetIP6(app.State.Server),
+		})
+		return nil
+	})
 
-	i := 0
-	for k := range app.State.Clients {
-		keys[i] = k
-		i++
-	}
-
-	sort.Ints(keys)
-
-	for j := 0; j < 1; j++ {
-		for _, k := range keys {
-			cl := app.State.Clients[k]
-			if cl == nil {
-				continue
-			}
-
-			rows = append(rows, []string{
-				cl.GetIPNumberString(),
-				cl.GetName(),
-				cl.GetIP4(app.State.Server),
-				cl.GetIP6(app.State.Server),
-			})
-		}
+	if err != nil {
+		panic(err)
 	}
 
 	return rows

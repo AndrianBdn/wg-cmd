@@ -4,3 +4,4 @@ ignore
 deploy.sh
 debug
 wg-cmd.log
+.DS_Store

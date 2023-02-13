@@ -1,0 +1,6 @@
+# Warning: this is not a Wireguard config
+# This file uses TOML (toml.io) syntax, instead of Wireguard 
+# wg-dir-conf tool builds Wireguard config using files in this directory
+# >> You are welcome to edit this file, it wont be overwritten.
+PublicKey = "/0jlhJqSAHXnFo4tHDHxLkF/HC64dGegsdVu6ct+DWY="
+PrivateKey = "2E3CBKRzpLGDliL4BMDF+VJqfahC78/XLNvOzDGJjnk="
