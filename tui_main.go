@@ -29,7 +29,7 @@ type MainScreen struct {
 
 func NewMainScreen(app *app.App, sSize tea.WindowSizeMsg) MainScreen {
 	helpKeys := []helpKey{
-		{key: "F1", help: "Help"},
+		{key: "F1", help: "About"},
 		{key: "F4", help: "Edit"},
 		{key: "F7", help: "Add Peer"},
 		{key: "F8", help: "Delete Peer"},
@@ -280,9 +280,13 @@ func (m MainScreen) EditCurrentItem() MainScreen {
 }
 
 func (m MainScreen) Help() (tea.Model, tea.Cmd) {
-	ver := version
+	ver := Version
 	if ver == "" {
 		ver = "<not set>"
+	}
+
+	if BuildTime != "" {
+		ver += " (" + BuildTime + ")"
 	}
 
 	m.dialog = NewTuiDialogMsg(

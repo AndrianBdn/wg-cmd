@@ -10,7 +10,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-var version string
+var (
+	Version   string
+	BuildTime string
+)
 
 func main() {
 	rand.Seed(time.Now().UnixNano()) // TODO: Remove when upgrade to go 1.20
