@@ -285,8 +285,8 @@ func (m MainScreen) Help() (tea.Model, tea.Cmd) {
 		ver = "<not set>"
 	}
 
-	if BuildTime != "" {
-		ver += " (" + BuildTime + ")"
+	if Build != "" {
+		ver += " (" + Build + ")"
 	}
 
 	m.dialog = NewTuiDialogMsg(

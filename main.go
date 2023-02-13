@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	Version   string
-	BuildTime string
+	Version string
+	Build   string
 )
 
 func main() {

@@ -1,9 +1,8 @@
 VERSION=0.1.0
-# UTC timestamp in ISO 8601 format
-BUILD_TIME=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+BUILD=`git rev-parse --short=8 HEAD`
 .PHONY: all fmt static precommit
 
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}"
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
 
 
 all:
