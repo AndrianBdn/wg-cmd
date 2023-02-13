@@ -45,7 +45,6 @@ func (s *State) CanAddPeer(peerName string) (int, error) {
 }
 
 func (s *State) AddPeer(peerName string) error {
-
 	foundIP, err := s.CanAddPeer(peerName)
 	if err != nil {
 		return err
@@ -105,7 +104,7 @@ func (s *State) GenerateWireguardFile(wgConfigPath string, backup bool) error {
 		}
 	}
 
-	err = os.WriteFile(wgConfigPath, buf.Bytes(), 0600)
+	err = os.WriteFile(wgConfigPath, buf.Bytes(), 0o600)
 	if err != nil {
 		return fmt.Errorf("writing to %s file: %w", wgConfigPath, err)
 	}

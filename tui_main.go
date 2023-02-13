@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"os"
+	"os/exec"
+
 	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/andrianbdn/wg-cmd/sysinfo"
@@ -8,9 +12,6 @@ import (
 	"github.com/andrianbdn/wg-cmd/tutils"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"log"
-	"os"
-	"os/exec"
 )
 
 type MainScreen struct {
@@ -92,7 +93,6 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-
 	case tea.KeyMsg:
 		switch msg.Type {
 
@@ -145,7 +145,6 @@ func (m MainScreen) View() string {
 	}
 
 	return mainScreen
-
 }
 
 func (m MainScreen) ViewPeer() (tea.Model, tea.Cmd) {

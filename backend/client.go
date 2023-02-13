@@ -5,11 +5,12 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/BurntSushi/toml"
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 type Client struct {
@@ -45,7 +46,7 @@ func NewClient(ip int, name string) *Client {
 }
 
 func (c *Client) WriteOnce() error {
-	f, err := os.OpenFile(c.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(c.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("Client.WriteOnce, can't create %s file %w", c.fileName, err)

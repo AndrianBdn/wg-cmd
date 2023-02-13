@@ -29,7 +29,7 @@ func NetworkInterfaceExists(iface string) bool {
 			}
 		}
 	}
-	
+
 	ifls6, err := readProcNetIPV6Route()
 	if err == nil {
 		for _, ifl := range ifls6 {

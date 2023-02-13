@@ -19,10 +19,6 @@ func HasSystemd() bool {
 	return false
 }
 
-func HasSysctl() bool {
-	return sysctlPath() != ""
-}
-
 func NatEnabledIPv4() bool {
 	return fileIs1("/proc/sys/net/ipv4/ip_forward")
 }
@@ -46,7 +42,7 @@ func EnableNat(ip4, ip6 bool) error {
 }
 
 func writeLineToSysctlConf(line string) error {
-	f, err := os.OpenFile("/etc/sysctl.conf", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("/etc/sysctl.conf", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to open /etc/sysctl.conf: %w", err)
 	}
@@ -109,7 +105,7 @@ func createSystemdPathForInterface(iface, wgdir string) error {
 	pathName := pathNameForInterface(iface)
 	pathLoc := filepath.Join("/etc/systemd/system", pathName)
 	// save pathContent to pathLoc
-	if err := os.WriteFile(pathLoc, []byte(pathContent), 0644); err != nil {
+	if err := os.WriteFile(pathLoc, []byte(pathContent), 0o644); err != nil {
 		return fmt.Errorf("failed to write %s: %w", pathLoc, err)
 	}
 
@@ -129,7 +125,7 @@ func createSystemdTargetService(iface string) error {
 	targetServiceLoc := filepath.Join("/etc/systemd/system", targetServiceName)
 
 	// save targetService to targetServiceLoc
-	if err := os.WriteFile(targetServiceLoc, []byte(targetService), 0644); err != nil {
+	if err := os.WriteFile(targetServiceLoc, []byte(targetService), 0o644); err != nil {
 		return fmt.Errorf("failed to write %s: %w", targetServiceLoc, err)
 	}
 

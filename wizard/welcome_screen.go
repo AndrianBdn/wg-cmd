@@ -46,7 +46,6 @@ func (m welcomeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.testDone = true
 				return m, nil
 			} else {
-
 				if m.dirError != "" {
 					return m, tea.Quit
 				} else {
@@ -54,11 +53,9 @@ func (m welcomeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return welcomeScreenResult{}
 					}
 				}
-
 			}
 
 		}
-
 	}
 
 	return m, cmd
@@ -87,7 +84,6 @@ func (m welcomeScreen) View() string {
 			dynamicBlock = s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Success.") +
 				s.xColor.Render(" Directory(s) are writable. Press ENTER to continue with configuration."))
 		}
-
 	}
 
 	dir := m.app.Settings.WireguardDir

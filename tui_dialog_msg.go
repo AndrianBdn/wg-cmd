@@ -46,7 +46,6 @@ func (m TuiDialogMsg) View() string {
 }
 
 func InfoView(title, message string) string {
-
 	frameStyle := theme.Current.DialogBackground.Copy().Width(44).Padding(1, 2)
 	titleStyle := theme.Current.DialogTitle.Copy().Width(40).Align(lipgloss.Left)
 	msgStyle := theme.Current.DialogBackground.Copy().Width(40).Align(lipgloss.Left).Padding(1, 0, 0, 0)
@@ -57,11 +56,9 @@ func InfoView(title, message string) string {
 			msgStyle.Render(message),
 		),
 	)
-
 }
 
 func ErrorView(title, message string) string {
-
 	frameStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("0")).Width(34).Padding(1, 2)
 	titleStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("11")).Width(30).Align(0.5)
 	msgStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("15")).Width(30).Align(0.5).Padding(1, 0)
@@ -72,5 +69,4 @@ func ErrorView(title, message string) string {
 			msgStyle.Render(message),
 		),
 	)
-
 }

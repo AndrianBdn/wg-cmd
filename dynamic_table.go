@@ -1,10 +1,11 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/andrianbdn/wg-cmd/theme"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"strings"
 )
 
 type DynamicTableList struct {
@@ -38,7 +39,6 @@ func (m *DynamicTableList) Up() {
 			m.offset = 0
 		}
 	}
-
 }
 
 func (m *DynamicTableList) Down() {

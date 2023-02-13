@@ -75,7 +75,6 @@ func (m optionScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyF3:
 			return m, tea.Quit
 		}
-
 	}
 
 	return m, cmd

@@ -2,10 +2,11 @@ package app
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/adrg/xdg"
 	"os"
 	"strings"
+
+	"github.com/BurntSushi/toml"
+	"github.com/adrg/xdg"
 )
 
 type Settings struct {
@@ -44,7 +45,7 @@ func (a *App) SaveSettings() error {
 		return fmt.Errorf("xdg %w", err)
 	}
 
-	f, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return fmt.Errorf("SaveSettings OpenFile %w", err)
 	}

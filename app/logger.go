@@ -19,7 +19,7 @@ func configureLogger() {
 	}
 	exPath := filepath.Dir(ex)
 
-	f, err := os.OpenFile(filepath.Join(exPath, "wg-cmd.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(filepath.Join(exPath, "wg-cmd.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}

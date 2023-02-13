@@ -41,7 +41,6 @@ func (m doneScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-
 		case tea.KeyEnter:
 			if !m.pressEnter {
 				err := m.app.CreateNewServer(m.blueprint)
@@ -69,7 +68,6 @@ func (m doneScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-
 	}
 
 	return m, cmd
@@ -96,7 +94,6 @@ func (m doneScreen) View() string {
 			dynamicBlock = s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Success.") +
 				s.xColor.Render(" Configuration written. Press ENTER to continue."))
 		}
-
 	}
 
 	top := lipgloss.JoinVertical(0,

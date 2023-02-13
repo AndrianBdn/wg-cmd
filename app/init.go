@@ -2,18 +2,18 @@ package app
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-cmd/backend"
 	"os"
+
+	"github.com/andrianbdn/wg-cmd/backend"
 )
 
 func (a *App) CreateNewServer(b backend.ServerBlueprint) error {
-
 	p := a.interfaceDir(b.InterfaceName)
 	if _, err := os.Stat(p); err == nil {
 		return fmt.Errorf("interface directory exists %s", p)
 	}
 
-	err := os.Mkdir(p, 0700)
+	err := os.Mkdir(p, 0o700)
 	if err != nil {
 		return fmt.Errorf("can't create %s:%w", p, err)
 	}

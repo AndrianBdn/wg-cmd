@@ -3,11 +3,12 @@ package backend
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/lithammer/dedent"
 	mrand "math/rand"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lithammer/dedent"
 )
 
 func writeConfigHeader(f *os.File) {

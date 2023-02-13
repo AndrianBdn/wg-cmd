@@ -7,8 +7,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type TuiDialogCancel struct{}
-type TuiDialogValue string
+type (
+	TuiDialogCancel struct{}
+	TuiDialogValue  string
+)
 
 const (
 	tdfSelectionField = iota
@@ -58,17 +60,14 @@ func (m TuiDialogField) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.Type {
-
 			case tea.KeyEscape, tea.KeyEnter:
 				m.validationError = ""
 				return m, textinput.Blink
 			}
 		}
-
 	}
 
 	switch msg := msg.(type) {
-
 	case tea.KeyMsg:
 		switch msg.Type {
 
@@ -137,7 +136,6 @@ func (m TuiDialogField) View() string {
 			m.RenderButtons(),
 		),
 	)
-
 }
 
 func (m TuiDialogField) RenderButtons() string {
@@ -164,5 +162,4 @@ func (m TuiDialogField) RenderButtons() string {
 	return bg.Render(renderButton(m.buttonOK1, m.selectedItem == tdfSelectionOK) +
 		theme.Current.DialogBackground.Render(" ") +
 		renderButton(m.buttonCancel2, m.selectedItem == tdfSelectionCancel))
-
 }

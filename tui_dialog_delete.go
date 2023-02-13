@@ -5,8 +5,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type TuiDialogYes struct{}
-type TuiDialogNo struct{}
+type (
+	TuiDialogYes struct{}
+	TuiDialogNo  struct{}
+)
 
 type TuiDialogYesNo struct {
 	Title          string
@@ -26,7 +28,6 @@ func (m TuiDialogYesNo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-
 	case tea.KeyMsg:
 
 		switch msg.Type {
@@ -79,7 +80,6 @@ func (m TuiDialogYesNo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m TuiDialogYesNo) View() string {
-
 	redBg := lipgloss.NewStyle().Background(lipgloss.Color("1"))
 	frameStyle := redBg.Copy().Foreground(lipgloss.Color("0")).Width(44).Padding(1, 2)
 	titleStyle := redBg.Copy().Foreground(lipgloss.Color("11")).Width(40).Align(0.5)
@@ -108,5 +108,4 @@ func (m TuiDialogYesNo) View() string {
 			btnStyle.Render(lipgloss.JoinHorizontal(0, yes, redBg.Render(" "), no)),
 		),
 	)
-
 }

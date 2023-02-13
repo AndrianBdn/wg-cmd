@@ -4,13 +4,14 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"fmt"
-	"github.com/andrianbdn/wg-cmd/backend"
-	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/andrianbdn/wg-cmd/backend"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
 )
 
 type App struct {
@@ -133,7 +134,7 @@ func testIfDirWritable(dir string) string {
 	testFileName := randomFileName()
 	testFile := filepath.Join(dir, testFileName)
 
-	err := os.WriteFile(testFile, []byte(testFileName), 0600)
+	err := os.WriteFile(testFile, []byte(testFileName), 0o600)
 	if err != nil {
 		return fmt.Sprint("can't write file in ", dir, ":", err.Error())
 	}

@@ -2,11 +2,12 @@ package wizard
 
 import (
 	"fmt"
+	"math"
+	"strings"
+
 	"github.com/andrianbdn/wg-cmd/tutils"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"math"
-	"strings"
 )
 
 type portStepResult uint16
@@ -87,7 +88,6 @@ func (m portScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyF3:
 			return m, tea.Quit
 		}
-
 	}
 
 	return m, cmd

@@ -1,10 +1,11 @@
 package tutils
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/leaanthony/go-ansi-parser"
-	"strings"
 )
 
 func PlaceDialog(dialog, background string, screenSize tea.WindowSizeMsg, bgStyle lipgloss.Style) string {

@@ -62,7 +62,6 @@ func (m interfaceScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return interfaceScreenResult(m.ifName.Value())
 			}
 		}
-
 	}
 
 	m.ifName, cmd = m.ifName.Update(msg)

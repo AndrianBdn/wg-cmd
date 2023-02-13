@@ -2,14 +2,15 @@ package backend
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/andrianbdn/wg-cmd/sysinfo"
-	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"io"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/BurntSushi/toml"
+	"github.com/andrianbdn/wg-cmd/sysinfo"
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 const ServerFileName = `0001-server.toml`
@@ -179,7 +180,7 @@ func ReadServer() (*Server, error) {
 }
 
 func (s *Server) WriteOnce() error {
-	f, err := os.OpenFile(ServerFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(ServerFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("Server.WriteOnce, can't create %s file %w", ServerFileName, err)

@@ -2,14 +2,15 @@ package main
 
 import (
 	"bytes"
+	"io"
+	"strings"
+
 	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/andrianbdn/wg-cmd/theme"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdp/qrterminal/v3"
-	"io"
-	"strings"
 )
 
 type qr struct {

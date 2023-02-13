@@ -1,15 +1,18 @@
 package wizard
 
 import (
+	"math/rand"
+
 	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/andrianbdn/wg-cmd/sysinfo"
 	tea "github.com/charmbracelet/bubbletea"
-	"math/rand"
 )
 
-const optIdNAT = "optIdNAT"
-const optIdDNS = "optIdDNS"
+const (
+	optIdNAT = "optIdNAT"
+	optIdDNS = "optIdDNS"
+)
 
 type Done struct {
 	InterfaceName string
@@ -54,7 +57,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if msg, ok := msg.(interfaceScreenResult); ok {
 		m.blueprint.InterfaceName = string(msg)
-		//step2 := newEndpointStep(m.app, m.sSize)
+		// step2 := newEndpointStep(m.app, m.sSize)
 
 		portStep := newPortScreen(m.sSize)
 		m.currentModel = portStep

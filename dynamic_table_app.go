@@ -1,17 +1,20 @@
 package main
 
 import (
-	"github.com/andrianbdn/wg-cmd/app"
-	"github.com/andrianbdn/wg-cmd/backend"
 	"log"
 	"sort"
 	"strconv"
+
+	"github.com/andrianbdn/wg-cmd/app"
+	"github.com/andrianbdn/wg-cmd/backend"
 )
 
 func stringRowsFromApp(app *app.App) [][]string {
 	rows := make([][]string, 0, len(app.State.Clients)+1)
-	rows = append(rows, []string{"0001", "Server (" + app.State.Server.Interface + ")",
-		app.State.Server.Address4, app.State.Server.Address6})
+	rows = append(rows, []string{
+		"0001", "Server (" + app.State.Server.Interface + ")",
+		app.State.Server.Address4, app.State.Server.Address6,
+	})
 
 	keys := make([]int, len(app.State.Clients))
 

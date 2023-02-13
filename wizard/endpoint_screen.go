@@ -1,12 +1,13 @@
 package wizard
 
 import (
+	"strings"
+
 	"github.com/andrianbdn/wg-cmd/sysinfo"
 	"github.com/andrianbdn/wg-cmd/tutils"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"strings"
 )
 
 type endpointStepResult string

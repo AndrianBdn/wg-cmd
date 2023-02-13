@@ -1,8 +1,9 @@
 package theme
 
 import (
-	"github.com/charmbracelet/lipgloss"
 	"strconv"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Current is a current theme

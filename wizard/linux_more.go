@@ -114,7 +114,6 @@ func (m linuxMoreScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-
 	}
 
 	return m, cmd
@@ -142,7 +141,6 @@ func (m linuxMoreScreen) View() string {
 			dynamicBlock = s.xText.Render(lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Render("Success.") +
 				s.xColor.Render(" System changes were performed. Press ENTER to continue."))
 		}
-
 	}
 
 	top := lipgloss.JoinVertical(0,

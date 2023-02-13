@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/andrianbdn/wg-cmd/app"
-	tea "github.com/charmbracelet/bubbletea"
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/andrianbdn/wg-cmd/app"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 var version string
