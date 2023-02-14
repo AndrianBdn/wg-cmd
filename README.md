@@ -1,11 +1,11 @@
 # WG Commander 
 aka "wg-cmd" — TUI for managing WireGuard configuration files
-![Screenshot](https://user-images.githubusercontent.com/994900/218503955-9f61eb8b-1eeb-4872-9f0e-979bed549d8d.png)
+![screenshot](https://user-images.githubusercontent.com/994900/218720566-e5b3ab22-d7fc-4df7-a777-ad9b6280ada8.png)
 
 # Features
 - no need for browser, forwarding HTTP ports - only SSH
-- Setup Wizard
-- TUI for managing peers
+- has a nice Setup Wizard
+- Text-based user interface for managing peers
 - view QR code in your Terminal
 - automatically configures sysctl, systemd, NAT
 
