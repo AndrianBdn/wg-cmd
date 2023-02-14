@@ -248,6 +248,8 @@ func (m MainScreen) EditCurrentItem() MainScreen {
 		}
 	}
 
+	file = m.app.State.JoinPath(file)
+
 	editor := sysinfo.GetSystemEditorPath()
 	if editor == "" {
 		m.dialog = NewTuiDialogMsg("Error", "Cannot find any editor", true)

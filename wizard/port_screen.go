@@ -65,7 +65,7 @@ func (m portScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.port = m.port - 100
 			}
 
-		case tea.KeyCtrlShiftLeft:
+		case tea.KeyDown:
 			if m.port > 1000 {
 				m.port = m.port - 1000
 			}
@@ -80,9 +80,19 @@ func (m portScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.port = m.port + 100
 			}
 
-		case tea.KeyCtrlShiftRight:
+		case tea.KeyUp:
 			if m.port < math.MaxUint16-1000 {
 				m.port = m.port + 1000
+			}
+
+		case tea.KeyShiftDown:
+			if m.port > 10000 {
+				m.port = m.port - 10000
+			}
+
+		case tea.KeyShiftUp:
+			if m.port < math.MaxUint16-10000 {
+				m.port = m.port + 10000
 			}
 
 		case tea.KeyF3:
@@ -99,8 +109,10 @@ func (m portScreen) View() string {
 	top := lipgloss.JoinVertical(0,
 		s.header(),
 		s.xText.Render("Choose a UDP port for a WireGuard(R) VPN endpoint."),
-		s.xText.Render("\nUse the LEFT and RIGHT ARROW keys to increment or decrement port number. Hold SHIFT key"+
-			" while pressing the ARROW keys to change value faster. Hold CTRL+SHIFT to increase change speed further.\n"),
+		s.xText.Render("\nUse the LEFT and RIGHT ARROW keys to increment or decrement port number. "+
+			"Hold SHIFT key "+
+			"while pressing the ARROW keys to change value faster. Use UP and DOWN ARROW keys "+
+			"to increase change speed further.\n"),
 	)
 
 	tw := m.sSize.Width - 3 - 3 - 2

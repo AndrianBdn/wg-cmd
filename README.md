@@ -66,6 +66,6 @@ It was tested on:
 - Rocky Linux 9
 
 # Notes 
-There is no commerical purpose behind WG Commander. The project is licensed under the [MIT License](https://github.com/andrianbdn/wg-cmd/blob/master/LICENSE).
+There is no commercial purpose behind WG Commander. The project is licensed under the [MIT License](https://github.com/andrianbdn/wg-cmd/blob/master/LICENSE).
 
-This projectis NOT related to the creator of WireGuard®. WG Commander project is NOT approved, sponsored, or affiliated with WireGuard® or with the WireGuard® community.
+This project is NOT related to the creator of WireGuard®. WG Commander project is NOT approved, sponsored, or affiliated with WireGuard® or with the WireGuard® community.

@@ -14,11 +14,12 @@ import (
 )
 
 type Client struct {
-	ipNum      int
-	name       string
-	fileName   string
-	PublicKey  string
-	PrivateKey string
+	ipNum       int
+	name        string
+	fileName    string
+	PublicKey   string
+	PrivateKey  string
+	ClientRoute string
 }
 
 func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, error) {

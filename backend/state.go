@@ -19,6 +19,10 @@ type State struct {
 	Clients map[int]*Client
 }
 
+func (s *State) JoinPath(path string) string {
+	return filepath.Join(s.dir, path)
+}
+
 func (s *State) CanAddPeer(peerName string) (int, error) {
 	r := regexp.MustCompile(`^` + PeerNameRegExp + `$`)
 	if !r.MatchString(peerName) {

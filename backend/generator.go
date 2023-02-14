@@ -53,7 +53,12 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 		_, _ = fmt.Fprintln(w, "PresharedKey =", server.PresharedKey)
 	}
 	_, _ = fmt.Fprintln(w, "PublicKey =", server.PublicKey)
-	_, _ = fmt.Fprintln(w, "AllowedIPs =", server.ClientRoute)
+	cr := c.ClientRoute
+	if cr == "" {
+		cr = server.ClientRoute
+	}
+
+	_, _ = fmt.Fprintln(w, "AllowedIPs =", cr)
 	_, _ = fmt.Fprintln(w, "Endpoint =", server.ClientServerEndpoint+":"+strconv.Itoa(int(server.ListenPort)))
 
 	if server.ClientPersistentKeepalive != 0 {

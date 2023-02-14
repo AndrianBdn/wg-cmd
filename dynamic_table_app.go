@@ -24,7 +24,6 @@ func stringRowsFromApp(app *app.App) [][]string {
 		})
 		return nil
 	})
-
 	if err != nil {
 		panic(err)
 	}

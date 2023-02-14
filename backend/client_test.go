@@ -1,8 +1,9 @@
 package backend
 
 import (
-	"gotest.tools/v3/golden"
 	"testing"
+
+	"gotest.tools/v3/golden"
 )
 
 func TestClient_GetPlainTextConfig(t *testing.T) {

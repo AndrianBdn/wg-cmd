@@ -28,5 +28,5 @@ func CreateSystemdStuff(iface, wgdir string) error {
 }
 
 func HasIPTables() bool {
-	return os.Getenv("WGCMD_NO_DEPS") != ""
+	return os.Getenv("WG_CMD_NO_DEPS") != ""
 }

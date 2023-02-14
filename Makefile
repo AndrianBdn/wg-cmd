@@ -14,6 +14,13 @@ arm64: export GOARCH=arm64
 arm64:
 	go build ${LDFLAGS} -o ${BINARY}-${GOOS}-${GOARCH}
 
+
+amd64: export GOOS=linux
+amd64: export GOARCH=amd64
+amd64:
+	go build ${LDFLAGS} -o ${BINARY}-${GOOS}-${GOARCH}
+
+
 fmt:
 	gofumpt -l -w .
 

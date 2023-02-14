@@ -1,9 +1,10 @@
 package backend
 
 import (
-	"gotest.tools/v3/golden"
 	"strings"
 	"testing"
+
+	"gotest.tools/v3/golden"
 )
 
 func TestStateRead(t *testing.T) {

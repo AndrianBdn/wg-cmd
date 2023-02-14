@@ -129,7 +129,7 @@ func (m endpointScreen) View() string {
 	}
 
 	bottom := lipgloss.JoinVertical(0,
-		s.xText.Render("Note: The Setup expects that WireGuard(R) UDP port is accessible from the Internet\n"),
+		s.xText.Render("Note: The Setup doesn't check that WireGuard(R) UDP port is accessible from the Internet\n"),
 
 		s.xTooltip.Render("ENTER=Continue F3=Quit"),
 	)
