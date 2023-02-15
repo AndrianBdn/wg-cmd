@@ -57,7 +57,7 @@ func (a *App) RunCli() {
 			fmt.Println("Error making Wireguard config:", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Successfuly wrote Wireguard config to %s\n", path)
+		fmt.Printf("Successfully wrote Wireguard config to %s\n", path)
 		os.Exit(0)
 	}
 }
