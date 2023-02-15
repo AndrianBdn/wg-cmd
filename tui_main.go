@@ -12,17 +12,21 @@ import (
 )
 
 type MainScreen struct {
-	app   *app.App
-	sSize tea.WindowSizeMsg
-
+	app              *app.App
+	sSize            tea.WindowSizeMsg
 	dialog           tea.Model
 	dialogFullScreen bool
-
-	table    DynamicTableList
-	helpKeys []helpKey
-
-	extEditor extEditorState
+	table            DynamicTableList
+	helpKeys         []helpKey
+	extEditor        extEditorState
+	exitBanner       int
 }
+
+const (
+	exitBannerNone = iota
+	exitBannerShouldShow
+	exitBannerShow
+)
 
 func NewMainScreen(app *app.App, sSize tea.WindowSizeMsg) MainScreen {
 	helpKeys := []helpKey{
@@ -104,6 +108,14 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.EditCurrentItem()
 
 		case tea.KeyF10:
+			if m.exitBanner == exitBannerShouldShow {
+				// this is a temporary workaround for screen not being cleared / restored
+				// after launching an external editor and quitting
+				m.exitBanner = exitBannerShow
+				return m, tea.Sequence(tea.ExitAltScreen,
+					tea.Println("Thank you for using WG Commander!"),
+					tea.Quit)
+			}
 			return m, tea.Quit
 
 		case tea.KeyF7:
@@ -133,6 +145,9 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainScreen) View() string {
+	if m.exitBanner == exitBannerShow {
+		return ""
+	}
 	mainScreen := lipgloss.JoinVertical(lipgloss.Left,
 		m.table.Render(),
 		RenderHelpLine(m.sSize.Width, m.helpKeys...),

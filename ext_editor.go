@@ -81,5 +81,6 @@ func (m MainScreen) EditCurrentItem() (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	m.exitBanner = exitBannerShouldShow
 	return m, m.extEditor.launchEditor()
 }
