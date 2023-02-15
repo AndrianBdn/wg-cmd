@@ -6,3 +6,4 @@ debug
 wg-cmd.log
 wg-cmd*
 .DS_Store
+release

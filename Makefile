@@ -1,6 +1,6 @@
 VERSION=0.1.0
 BUILD=`git rev-parse --short=8 HEAD`
-.PHONY: all fmt static precommit arm64 amd64 fmt static test
+.PHONY: all fmt static precommit arm64 amd64 fmt static test release release_dir
 
 LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
 BINARY=wg-cmd
@@ -11,14 +11,14 @@ all:
 
 arm64: export GOOS=linux
 arm64: export GOARCH=arm64
-arm64:
-	go build ${LDFLAGS} -o ${BINARY}-${GOOS}-${GOARCH}
+arm64: release_dir
+	go build ${LDFLAGS} -o release/${BINARY}-${VERSION}-${GOOS}-${GOARCH}
 
 
 amd64: export GOOS=linux
 amd64: export GOARCH=amd64
-amd64:
-	go build ${LDFLAGS} -o ${BINARY}-${GOOS}-${GOARCH}
+amd64: release_dir
+	go build ${LDFLAGS} -o release/${BINARY}-${VERSION}-${GOOS}-${GOARCH}
 
 
 fmt:
@@ -30,5 +30,10 @@ static:
 
 test:
 	go test ./...
+
+release_dir:
+	mkdir -p release
+
+release: arm64 amd64
 
 precommit: fmt static test
