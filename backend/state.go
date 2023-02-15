@@ -181,7 +181,7 @@ func ReadState(dir string, wlog *log.Logger) (*State, error) {
 
 		client, err := ReadClient(dir, f.Name(), ip, name)
 		if err != nil {
-			return nil, fmt.Errorf("cannot read file %s error %w", f.Name(), err)
+			return nil, fmt.Errorf("cannot read file %s: %w", f.Name(), err)
 		}
 		cls[ip] = client
 	}

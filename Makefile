@@ -1,6 +1,6 @@
 VERSION=0.1.0
 BUILD=`git rev-parse --short=8 HEAD`
-.PHONY: all fmt static precommit arm64 amd64
+.PHONY: all fmt static precommit arm64 amd64 fmt static test
 
 LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
 BINARY=wg-cmd
@@ -28,4 +28,7 @@ static:
 	go vet ./...
 	staticcheck ./...
 
-precommit: fmt static
+test:
+	go test -v ./...
+
+precommit: fmt static test

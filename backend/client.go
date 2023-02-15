@@ -26,7 +26,7 @@ func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, e
 	var c Client
 	_, err := toml.DecodeFile(filepath.Join(dir, fileName), &c)
 	if err != nil {
-		return nil, fmt.Errorf("ReadClient error %w", err)
+		return nil, fmt.Errorf("ReadClient %w", err)
 	}
 	c.fileName = fileName
 	c.ipNum = ipNum

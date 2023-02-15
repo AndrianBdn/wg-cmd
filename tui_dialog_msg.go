@@ -59,9 +59,11 @@ func InfoView(title, message string) string {
 }
 
 func ErrorView(title, message string) string {
-	frameStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("0")).Width(34).Padding(1, 2)
-	titleStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("11")).Width(30).Align(0.5)
-	msgStyle := lipgloss.NewStyle().Background(lipgloss.Color("1")).Foreground(lipgloss.Color("15")).Width(30).Align(0.5).Padding(1, 0)
+	padLR := 2
+	w := 34
+	frameStyle := theme.Current.DialogErrorBackground.Copy().Width(w+padLR*2).Padding(1, 2)
+	titleStyle := theme.Current.DialogErrorTitle.Copy().Width(w).Align(lipgloss.Center)
+	msgStyle := theme.Current.DialogErrorMessage.Copy().Width(w).Align(lipgloss.Center).Padding(1, 0)
 
 	return frameStyle.Render(
 		lipgloss.JoinVertical(0,

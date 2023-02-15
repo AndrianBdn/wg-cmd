@@ -24,6 +24,10 @@ type Theme struct {
 	DialogButtonFirstLetter      lipgloss.Style
 	DialogButtonFocus            lipgloss.Style
 	DialogButtonFocusFirstLetter lipgloss.Style
+
+	DialogErrorBackground lipgloss.Style
+	DialogErrorTitle      lipgloss.Style
+	DialogErrorMessage    lipgloss.Style
 }
 
 func DefaultTheme() Theme {
@@ -49,5 +53,9 @@ func DefaultTheme() Theme {
 		DialogButtonFirstLetter:      style(33, 238, false),
 		DialogButtonFocus:            style(39, 240, false),
 		DialogButtonFocusFirstLetter: style(33, 240, false),
+
+		DialogErrorBackground: style(0, 1, false),
+		DialogErrorTitle:      style(11, 1, false),
+		DialogErrorMessage:    style(15, 1, false),
 	}
 }
