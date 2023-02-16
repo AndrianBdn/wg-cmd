@@ -17,9 +17,9 @@ aka "wg-cmd" — TUI for managing WireGuard configuration files
 - automatically configures sysctl, systemd, NAT
 
 ## Current Limitations
-- simple client-server Wireguard setup
-- mostly for Linux (assumes iptables, systemd, sysctl are available)
-- not a lot of managing besides adding / removing peers
+- only simple client-server WireGuard setup
+- mostly for Linux (assumes iptables, systemd, sysctl are available) — see [Other OS](#other-os-besides-linux) section
+- can't manage existing Wireguard interfaces (but you can create new WireGuard interfaces on the same host)
 
 # Installation 
 
@@ -94,6 +94,40 @@ Client files contains `PrivateKey` field.
 If you find it unacceptable, you can remove it from the file after you exported 
 configuration (or QR code) to the client.
 
+### Other OS besides Linux
+
+WG Commander is designed to work on Linux, because it uses systemd, iptables, sysctl. 
+However, it is written in plain Go, so it should work on any OS that Go supports.
+
+- You will need to compile binary yourself.
+- Set the environment variable `WG_CMD_NO_DEPS` to 1 to disable any Linux-specific checking on start. 
+- Edit 0001-server.toml and set your OS commands in PostUp4/PostUp6/PostDown4/PostDown6 fields.
+- You will need to arrange WireGuard configuration reload yourself: wither restart WireGuard manually
+when config changes, or monitor the /etc/wireguard/wg*.conf files for changes and reload automatically.
+
+PRs are welcome to add support for other OSes.
+
+### Uninstall 
+
+To uninstall WG Commander, just remove the binary from /usr/local/bin/wg-cmd. 
+You can also remove directories /etc/wireguard/wgc-* and ~/.config/wg-cmd
+
+If you have created systemd units, you will need to remove them manually.
+
+Below is an example of how to remove WG Commander managed interface wg7 
+(change it to whatever interface you need to delete):
+
+```sh
+systemctl stop wgc-wg7.{path,service}
+systemctl disable wgc-wg7.{path,service}
+rm /etc/systemd/system/wgc-wg7.{path,service}
+systemctl stop wg-quick@wg7.service
+systemctl disable wg-quick@wg7.service
+rm /etc/wireguard/wg7.conf
+rm -Rf /etc/wireguard/wgc-wg7
+```
+
+
 # Tested
 WG Commander should work well on any systemd-based Linux
 distribution with WireGuard, iptables, sysctl available.
@@ -101,6 +135,7 @@ It was tested on:
 - Ubuntu 20.04
 - Ubuntu 22.04
 - Rocky Linux 9
+- Debian 11
 
 # Notes 
 There is no commercial purpose behind WG Commander. 
