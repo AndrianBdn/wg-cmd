@@ -15,7 +15,8 @@ type Settings struct {
 	DefaultInterface string
 	ViewerQRMode     bool
 
-	cliCommand string
+	cliCommand    string
+	saveInterface bool
 }
 
 func readSettings() (*Settings, error) {
@@ -89,6 +90,7 @@ func (s *Settings) applyCommandLine() {
 		arg = ""
 	} else if strings.HasPrefix(arg, "wgc-") {
 		arg = strings.Replace(arg, "wgc-", "", 1)
+		s.saveInterface = true
 	}
 
 	s.DefaultInterface = arg

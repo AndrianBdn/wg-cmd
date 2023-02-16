@@ -38,6 +38,13 @@ func NewApp() *App {
 	err = a.LoadInterface(a.Settings.DefaultInterface)
 	log.Println("error", err, "state", a.State != nil)
 
+	if err == nil && a.State != nil && settings.saveInterface && settings.cliCommand == "" {
+		err := a.SaveSettings()
+		if err != nil {
+			log.Println("Error saving settings", err)
+		}
+	}
+
 	if err != nil {
 		fmt.Printf("Unable to load interface %s: %s\n", a.Settings.DefaultInterface, err)
 		fmt.Println("To troubleshoot:")
