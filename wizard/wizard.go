@@ -90,7 +90,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if msg.result.id == "nat46" {
 				m.blueprint.Nat4 = true
-				m.blueprint.Nat4 = true
+				m.blueprint.Nat6 = true
 			} else if msg.result.id == "nat4" {
 				m.blueprint.Nat4 = true
 				m.blueprint.Nat6 = false
