@@ -29,10 +29,10 @@ Make sure you have Wireguard and iptables installed
 To download using curl run:
 ```shell
 # for x86_64 this command 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.0/wg-cmd-0.1.0-linux-amd64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.1/wg-cmd-0.1.1-linux-amd64 -o /usr/local/bin/wg-cmd
 
 # for arm64 this command
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.0/wg-cmd-0.1.0-linux-arm64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.1/wg-cmd-0.1.1-linux-arm64 -o /usr/local/bin/wg-cmd
 ```
 
 Set proper permissions and run the tool: 
