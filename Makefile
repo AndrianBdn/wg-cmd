@@ -1,4 +1,4 @@
-VERSION=0.1.0
+VERSION=0.1.1
 BUILD=`git rev-parse --short=8 HEAD`
 .PHONY: all fmt static precommit arm64 amd64 fmt static test release release_dir
 
