@@ -10,39 +10,41 @@ aka "wg-cmd" — TUI for managing WireGuard configuration files
 ![screenshot](https://user-images.githubusercontent.com/994900/218720566-e5b3ab22-d7fc-4df7-a777-ad9b6280ada8.png)
 
 # Features
-- no need for browser, forwarding HTTP ports - only SSH
+- no need for a browser or HTTP port - works in the terminal, over SSH too
 - has a nice Setup Wizard
-- Text-based user interface for managing peers
-- view QR code in your Terminal
+- text-based user interface for managing peers
+- view QR code in the terminal
 - automatically configures sysctl, systemd, NAT
 
 ## Current Limitations
-- only simple client-server WireGuard setup
+- supports only simple client-server WireGuard setup
 - mostly for Linux (assumes iptables, systemd, sysctl are available) — see [Other OS](#other-os-besides-linux) section
-- can't manage existing Wireguard interfaces (but you can create new WireGuard interfaces on the same host)
+- can't manage existing WireGuard configuration (but you can create new WireGuard interfaces on the same host)
 
 # Installation 
 
-Make sure you have Wireguard and iptables installed 
+Make sure you have WireGuard and iptables installed 
 (`apt install wireguard-tools` in Ubuntu / Debian, `dnf install wireguard-tools iptables` in Rocky/Alma 9). 
 
 To download using curl run:
 ```shell
-# for x86_64 this command 
+# for x86_64 
 curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.1/wg-cmd-0.1.1-linux-amd64 -o /usr/local/bin/wg-cmd
 
-# for arm64 this command
+# for arm64 
 curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.1/wg-cmd-0.1.1-linux-arm64 -o /usr/local/bin/wg-cmd
 ```
 
 Set proper permissions and run the tool: 
 ```
-$ chmod 755 /usr/local/bin/wg-cmd
-$ wg-cmd
+chmod 755 /usr/local/bin/wg-cmd
+wg-cmd
 ```
 
-If you don't have /usr/local/bin in $PATH you will have to
-run `/usr/local/bin/wg-cmd` command using full path.
+If you don't have `/usr/local/bin` in $PATH you will have to
+run `/usr/local/bin/wg-cmd` command using the full path.
+
+WG Commander requires root permissions to automatically tune sysctl, to create systemd units and to write to /etc/wireguard.
 
 # Usage 
 
@@ -52,25 +54,36 @@ On subsequent runs (if wizard was successful) it will just display management TU
 
 ## Advanced usage
 
-WG Commander requires root permissions to automatically tune sysctl, to create systemd units and to write to /etc/wireguard. 
-You can avoid this if you know what you are doing. 
+You can run WG Commander as a non-root user if you change permissions on 
+/etc/wireguard and configure sysctl/systemd manually.
 
 WG Commander keeps its own UI config in `~/.config/wg-cmd/wg-cmd.toml`
 
+The most important options are:
+```toml
+WireguardDir = "/etc/wireguard"
+# directory for WireGuard configuration files 
+
+DatabaseDir = "/etc/wireguard"
+# directory for WG Commander database files (wgc-<interface-name>
+```
+
+You can change these options to point to directories that you have write access to.
+
 ### Special options 
 
-Run `wg-cmd new` to start the Wizard for new interface configuration
+Run `wg-cmd new` to start the wizard for new interface configuration.
 
-Run `wg-cmd <wg-interface>` to switch to specific interface (must be created before with wg-cmd)
+Run `wg-cmd <wg-interface>` to switch to specific interface (must be created before with wg-cmd).
 
 Run `wg-cmd <wg-interface> make` to generate Wireguard configuration without showing UI.
 
 ### Configuration 
 
-WG Commander uses directories as a "database". 
+WG Commander uses directories as its "database". 
 It stores the interface configuration in /etc/wireguard/wgc-<interface-name> directory. 
 
-The configuration is stored in [TOML](https://toml.io) files.
+The configuration is stored using [TOML](https://toml.io) file format.
 
 Most configuration keys are similar to WireGuard ones. 
 
@@ -96,16 +109,23 @@ configuration (or QR code) to the client.
 
 ### Other OS besides Linux
 
-WG Commander is designed to work on Linux, because it uses systemd, iptables, sysctl. 
+WG Commander is designed to work on Linux, because it uses procfs, systemd, iptables, sysctl. 
 However, it is written in plain Go, so it should work on any OS that Go supports.
 
 - You will need to compile binary yourself.
-- Set the environment variable `WG_CMD_NO_DEPS` to 1 to disable any Linux-specific checking on start. 
+- Set the environment variable `WG_CMD_NO_DEPS` to 1 to disable any Linux-specific checks on start. 
 - Edit 0001-server.toml and set your OS commands in PostUp4/PostUp6/PostDown4/PostDown6 fields.
-- You will need to arrange WireGuard configuration reload yourself: wither restart WireGuard manually
-when config changes, or monitor the /etc/wireguard/wg*.conf files for changes and reload automatically.
+- You will need to reload WireGuard configuration: manually when you change something
+or monitor /etc/wireguard/wg*.conf files for changes and reload WireGuard automatically.
 
 PRs are welcome to add support for other OSes.
+
+### Running in Docker 
+
+Although it is possible, it is not recommended to run WG Commander in Docker. 
+
+The Setup Wizard will not work properly, because it needs to create systemd units and modify sysctl.
+
 
 ### Uninstall 
 
@@ -130,7 +150,8 @@ rm -Rf /etc/wireguard/wgc-wg7
 
 # Tested
 WG Commander should work well on any systemd-based Linux
-distribution with WireGuard, iptables, sysctl available.
+distribution with WireGuard, iptables, sysctl, procfs available.
+
 It was tested on:
 - Ubuntu 20.04
 - Ubuntu 22.04

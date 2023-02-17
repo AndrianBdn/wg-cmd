@@ -14,7 +14,7 @@ import (
 func writeConfigHeader(f *os.File) {
 	_, _ = f.WriteString(strings.TrimLeft(dedent.Dedent(`
 				# Warning: this is not a WireGuard config
-				# This file uses TOML (toml.io) syntax, instead of Wireguard 
+				# This file uses TOML (toml.io) syntax, instead of WireGuard 
 				# WG Commander builds WireGuard config using files in this directory
 				# >> You are welcome to edit this file, it wont be overwritten.
 				`), "\n"))

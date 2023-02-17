@@ -61,10 +61,10 @@ func (a *App) RunCli() {
 	if a.Settings.cliCommand == "make" {
 		path, err := a.GenerateWireguardConfig()
 		if err != nil {
-			fmt.Println("Error making Wireguard config:", err)
+			fmt.Println("Error making WireGuard config:", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Successfully wrote Wireguard config to %s\n", path)
+		fmt.Printf("Successfully wrote WireGuard config to %s\n", path)
 		os.Exit(0)
 	}
 }
