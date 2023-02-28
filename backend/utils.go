@@ -61,3 +61,15 @@ func concatIfNotEmpty(str string, add string) string {
 	}
 	return str
 }
+
+func dnsString(dns []string, ipv6 bool) string {
+	var dnsStr string
+	for _, d := range dns {
+		if strings.Contains(d, ":") && !ipv6 {
+			continue
+		}
+		dnsStr = concatIfNotEmpty(dnsStr, ", ")
+		dnsStr += d
+	}
+	return dnsStr
+}

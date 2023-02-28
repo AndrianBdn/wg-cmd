@@ -93,7 +93,7 @@ client configuration files.
 
 `ClientRoute` - AllowedIPs for client config
 
-`ClientDNS` - DNS for client config
+`ClientDNS` - DNS configuration value for all clients
 
 `ClientServerEndpoint` - Endpoint for client config
 
@@ -105,7 +105,10 @@ client configuration files.
 
 Contains `ClientRoute` that overrides the one from server config.
 
-`MTU` - Override server MTU with a different value for this client
+`MTU` - Override server MTU with a different value for this client. Set to -1 to omit MTU from this WireGuard client config.
+
+`DNS` - Override server `ClientDNS` setting for all clients. Specify a comma separated IP list. 
+Set to `no` or `none` to omit DNS from this WireGuard client config.
 
 Client configuration files contain `PrivateKey` field. 
 If you find it unacceptable, you can remove it from the file after you exported 

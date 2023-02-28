@@ -21,6 +21,7 @@ type Client struct {
 	PrivateKey  string
 	ClientRoute string
 	MTU         int
+	DNS         string
 }
 
 func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, error) {

@@ -44,8 +44,12 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 	_, _ = fmt.Fprintln(w, "PrivateKey =", c.PrivateKey)
 	_, _ = fmt.Fprintln(w, "Address =", c.AllowedIps(server))
 
-	if server.ClientDNS != "" {
-		_, _ = fmt.Fprintln(w, "DNS =", server.ClientDNS)
+	if c.DNS != "no" && c.DNS != "none" {
+		if c.DNS == "" && server.ClientDNS != "" {
+			_, _ = fmt.Fprintln(w, "DNS =", server.ClientDNS)
+		} else if c.DNS != "" {
+			_, _ = fmt.Fprintln(w, "DNS =", c.DNS)
+		}
 	}
 
 	_, _ = fmt.Fprintln(w, "\n[Peer]")
@@ -65,9 +69,9 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 		_, _ = fmt.Fprintln(w, "PersistentKeepalive =", server.ClientPersistentKeepalive)
 	}
 
-	if c.MTU != 0 {
+	if c.MTU > 0 {
 		_, _ = fmt.Fprintln(w, "MTU =", c.MTU)
-	} else if server.MTU != 0 {
+	} else if server.MTU != 0 && c.MTU == 0 {
 		_, _ = fmt.Fprintln(w, "MTU =", server.MTU)
 	}
 

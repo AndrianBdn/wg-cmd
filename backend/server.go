@@ -24,7 +24,7 @@ type ServerBlueprint struct {
 	Nat6          bool
 	Net4          string
 	Net6          string
-	DNS           string
+	DNS           []string
 }
 
 type Server struct {
@@ -108,7 +108,7 @@ func NewServerWithBlueprint(b ServerBlueprint) *Server {
 		}
 	}
 
-	s.ClientDNS = b.DNS
+	s.ClientDNS = dnsString(b.DNS, b.Net6 != "" && b.Nat6)
 	s.ClientServerEndpoint = b.Endpoint
 	s.ClientPersistentKeepalive = 42
 	return &s

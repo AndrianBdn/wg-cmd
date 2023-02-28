@@ -50,9 +50,22 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sSize = msg
 	}
 
+	if do, m, c := m.WizardStateUpdate(msg); do {
+		return m, c
+	}
+
+	if m.currentModel != nil {
+		w, c := m.currentModel.Update(msg)
+		m.currentModel = w
+		return m, c
+	}
+	return m, nil
+}
+
+func (m RootModel) WizardStateUpdate(msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 	if _, ok := msg.(welcomeScreenResult); ok {
 		m.currentModel = newInterfaceScreen(m.app, m.sSize)
-		return m, m.currentModel.Init()
+		return true, m, m.currentModel.Init()
 	}
 
 	if msg, ok := msg.(interfaceScreenResult); ok {
@@ -61,7 +74,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		portStep := newPortScreen(m.sSize)
 		m.currentModel = portStep
-		return m, portStep.Init()
+		return true, m, portStep.Init()
 	}
 
 	if msg, ok := msg.(portStepResult); ok {
@@ -69,20 +82,21 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		endStep := newEndpointStep(m.sSize)
 		m.currentModel = endStep
-		return m, endStep.Init()
+		return true, m, endStep.Init()
 	}
 
 	if msg, ok := msg.(endpointStepResult); ok {
 		m.blueprint.Endpoint = string(msg)
 		netStep := newNetScreen(m.sSize)
 		m.currentModel = netStep
-		return m, netStep.Init()
+		return true, m, netStep.Init()
 	}
 
 	if msg, ok := msg.(netStepResult); ok {
 		m.blueprint.Net4 = msg.net4
 		m.blueprint.Net6 = msg.net6
-		return m.presentNatDialog()
+		m, c := m.presentNatDialog()
+		return true, m, c
 	}
 
 	if msg, ok := msg.(optScreenResult); ok {
@@ -99,14 +113,15 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.blueprint.Nat6 = false
 			}
 
-			return m.presentDNSDialog()
+			m, c := m.presentDNSDialog()
+			return true, m, c
 		}
 
 		if msg.id == optIdDNS {
-			m.blueprint.DNS = msg.result.id
+			m.blueprint.DNS = dnsDict[msg.result.id]
 			doneStep := newDoneScreen(m.app, m.sSize, m.blueprint)
 			m.currentModel = doneStep
-			return m, doneStep.Init()
+			return true, m, doneStep.Init()
 		}
 
 	}
@@ -118,27 +133,22 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// extra step to check NAT and setup systemd
 			rootLinux := newLinuxMoreScreen(m.app, m.sSize, m.blueprint)
 			m.currentModel = rootLinux
-			return m, rootLinux.Init()
+			return true, m, rootLinux.Init()
 		}
 
-		return m, func() tea.Msg {
+		return true, m, func() tea.Msg {
 			return Done{InterfaceName: m.blueprint.InterfaceName}
 		}
 	}
 
 	if _, ok := msg.(linuxMoreDone); ok {
 		m.currentModel = nil
-		return m, func() tea.Msg {
+		return true, m, func() tea.Msg {
 			return Done{InterfaceName: m.blueprint.InterfaceName}
 		}
 	}
 
-	if m.currentModel != nil {
-		w, c := m.currentModel.Update(msg)
-		m.currentModel = w
-		return m, c
-	}
-	return m, nil
+	return false, nil, nil
 }
 
 func (m RootModel) View() string {
@@ -168,10 +178,10 @@ func (m RootModel) presentNatDialog() (tea.Model, tea.Cmd) {
 
 func (m RootModel) presentDNSDialog() (tea.Model, tea.Cmd) {
 	opts := []opt{
-		{"1.1.1.1", "Use Cloudflare DNS https://1.1.1.1"},
-		{"8.8.8.8", "Use Google DNS https://developers.google.com/speed/public-dns"},
-		{"9.9.9.9", "Use Quad9 DNS https://www.quad9.net/"},
-		{"208.67.222.222", "Use OpenDNS https://use.opendns.com/"},
+		{"cloudflare", "Use Cloudflare DNS https://1.1.1.1"},
+		{"google", "Use Google DNS https://developers.google.com/speed/public-dns"},
+		{"quad9", "Use Quad9 DNS https://www.quad9.net/"},
+		{"opendns", "Use OpenDNS https://use.opendns.com/"},
 	}
 
 	// shuffle options, so no service will get default treatment (on avarage)
