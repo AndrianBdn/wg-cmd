@@ -65,5 +65,11 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 		_, _ = fmt.Fprintln(w, "PersistentKeepalive =", server.ClientPersistentKeepalive)
 	}
 
+	if c.MTU != 0 {
+		_, _ = fmt.Fprintln(w, "MTU =", c.MTU)
+	} else if server.MTU != 0 {
+		_, _ = fmt.Fprintln(w, "MTU =", server.MTU)
+	}
+
 	return nil
 }

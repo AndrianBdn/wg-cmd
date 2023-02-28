@@ -42,6 +42,7 @@ type Server struct {
 	ClientRoute               string
 	ClientDNS                 string
 	ClientServerEndpoint      string
+	MTU                       int
 	ClientPersistentKeepalive int
 	addrInfo4                 *addressInfo4
 	addrInfo6                 *addressInfo6
@@ -211,6 +212,9 @@ func (s *Server) WriteInterfaceBlock(w io.Writer, writeComment bool) error {
 
 		PostUp = PostUp + s.PostUp6
 		PostDown = PostDown + s.PostDown6
+	}
+	if s.MTU != 0 {
+		_, _ = fmt.Fprintln(w, "MTU =", s.MTU)
 	}
 	_, _ = fmt.Fprintln(w, "PostUp =", PostUp)
 	_, _ = fmt.Fprintln(w, "PostDown =", PostDown)

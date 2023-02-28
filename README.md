@@ -99,11 +99,15 @@ client configuration files.
 
 `ClientPersistentKeepalive` - PersistentKeepalive for client config 
 
+`MTU` - MTU for the server and client (0 — make WireGuard choose)
+
 #### client configuration (nnnn-%client%.toml)
 
 Contains `ClientRoute` that overrides the one from server config.
 
-Client files contains `PrivateKey` field. 
+`MTU` - Override server MTU with a different value for this client
+
+Client configuration files contain `PrivateKey` field. 
 If you find it unacceptable, you can remove it from the file after you exported 
 configuration (or QR code) to the client.
 
