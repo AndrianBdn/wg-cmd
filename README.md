@@ -52,6 +52,8 @@ On first run WG Commander will show the setup wizard, that allows to configure n
 
 On subsequent runs (if wizard was successful) it will just display management TUI.
 
+Note regarding the QR code: some devices (Android?) may require a higher quality QR code. WG Commander will automatically increase quality when you make Terminal window resolution larger (smaller font, larger window).
+
 ## Advanced usage
 
 You can run WG Commander as a non-root user if you change permissions on 
