@@ -52,6 +52,12 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 		}
 	}
 
+	if c.MTU > 0 {
+		_, _ = fmt.Fprintln(w, "MTU =", c.MTU)
+	} else if server.MTU != 0 && c.MTU == 0 {
+		_, _ = fmt.Fprintln(w, "MTU =", server.MTU)
+	}
+
 	_, _ = fmt.Fprintln(w, "\n[Peer]")
 	if server.PresharedKey != "" {
 		_, _ = fmt.Fprintln(w, "PresharedKey =", server.PresharedKey)
@@ -67,12 +73,6 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 
 	if server.ClientPersistentKeepalive != 0 {
 		_, _ = fmt.Fprintln(w, "PersistentKeepalive =", server.ClientPersistentKeepalive)
-	}
-
-	if c.MTU > 0 {
-		_, _ = fmt.Fprintln(w, "MTU =", c.MTU)
-	} else if server.MTU != 0 && c.MTU == 0 {
-		_, _ = fmt.Fprintln(w, "MTU =", server.MTU)
 	}
 
 	return nil
