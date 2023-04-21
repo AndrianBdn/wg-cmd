@@ -31,7 +31,13 @@ func (s *Server) generateServerPeerConfig(client *Client, w io.Writer) error {
 		_, _ = fmt.Fprintln(w, "PresharedKey =", s.PresharedKey)
 	}
 	_, _ = fmt.Fprintln(w, "PublicKey =", client.PublicKey)
-	_, _ = fmt.Fprintln(w, "AllowedIPs =", client.AllowedIps(s))
+
+	allowedIps := client.AllowedIps(s)
+	if client.AddServerRoute != "" {
+		allowedIps = allowedIps + ", " + client.AddServerRoute
+	}
+
+	_, _ = fmt.Fprintln(w, "AllowedIPs =", allowedIps)
 
 	return nil
 }

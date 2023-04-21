@@ -84,6 +84,14 @@ func (a *App) LoadInterface(ifName string) error {
 	return err
 }
 
+func (a *App) GenerateWireguardConfigLog() {
+	_, err := a.GenerateWireguardConfig()
+	if err != nil {
+		// TODO: probably not the best way to handle this error
+		log.Println("Error generating config", err)
+	}
+}
+
 func (a *App) GenerateWireguardConfig() (string, error) {
 	configPath := filepath.Join(a.Settings.WireguardDir, a.State.Server.Interface) + ".conf"
 	return configPath, a.State.GenerateWireguardFile(configPath, false)

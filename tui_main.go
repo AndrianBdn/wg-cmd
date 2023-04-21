@@ -218,10 +218,7 @@ func (m MainScreen) ReallyAddPeer(name string) MainScreen {
 		log.Println("Error adding peer", err)
 	}
 	if err == nil {
-		_, err = m.app.GenerateWireguardConfig()
-		if err != nil {
-			log.Println("Error generating config", err)
-		}
+		m.app.GenerateWireguardConfigLog()
 	}
 	m.dialog = nil
 	m.table = newAppDynamicTableList(m.app, &m.table)
@@ -241,10 +238,7 @@ func (m MainScreen) ReallyDeletePeer() MainScreen {
 			log.Println("Error deleting peer", err)
 		}
 		if err == nil {
-			_, err = m.app.GenerateWireguardConfig()
-			if err != nil {
-				log.Println("Error generating config", err)
-			}
+			m.app.GenerateWireguardConfigLog()
 		}
 
 		m.table.DeleteSelectedRow()

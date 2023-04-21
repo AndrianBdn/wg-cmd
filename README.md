@@ -29,10 +29,10 @@ Make sure you have WireGuard and iptables installed
 To download using curl run:
 ```shell
 # for x86_64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.3/wg-cmd-0.1.3-linux-amd64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.4/wg-cmd-0.1.4-linux-amd64 -o /usr/local/bin/wg-cmd
 
 # for arm64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.3/wg-cmd-0.1.3-linux-arm64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.4/wg-cmd-0.1.4-linux-arm64 -o /usr/local/bin/wg-cmd
 ```
 
 Set proper permissions and run the tool: 
@@ -105,7 +105,10 @@ client configuration files.
 
 #### client configuration (nnnn-%client%.toml)
 
-Contains `ClientRoute` that overrides the one from server config.
+`ClientRoute` - completely overrides the `ClientRoute` from the server config
+
+`AddServerRoute` - adds additional network to AllowedIPs for the client on the server side (useful 
+when you want to route traffic to one client to another client's network through the server)
 
 `MTU` - Override server MTU with a different value for this client. Set to -1 to omit MTU from this WireGuard client config.
 

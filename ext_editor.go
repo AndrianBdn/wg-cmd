@@ -56,6 +56,10 @@ func (m MainScreen) editorEvents(msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 			m.table = newAppDynamicTableList(m.app, &m.table)
 		}
 
+		// Even if we edit peer, we may need to regenerate the server config
+		// because of AddServerRoute client configuration option mainly
+		m.app.GenerateWireguardConfigLog()
+
 		return true, m, nil
 	}
 
