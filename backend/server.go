@@ -80,17 +80,34 @@ func NewServerWithBlueprint(b ServerBlueprint) *Server {
 
 	if b.Nat4 {
 		s.PostUp4 = fmt.Sprintf("iptables -A FORWARD -i %s -j ACCEPT; "+
-			"iptables -t nat -A POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP4Interface())
+			"iptables -A FORWARD -o %s -j ACCEPT; "+
+			"iptables -t nat -A POSTROUTING -o %s -j MASQUERADE",
+			b.InterfaceName,
+			b.InterfaceName,
+			sysinfo.DefaultIP4Interface())
 
 		s.PostDown4 = fmt.Sprintf("iptables -D FORWARD -i %s -j ACCEPT; "+
-			"iptables -t nat -D POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP4Interface())
+			"iptables -D FORWARD -o %s -j ACCEPT; "+
+			"iptables -t nat -D POSTROUTING -o %s -j MASQUERADE",
+			b.InterfaceName,
+			b.InterfaceName,
+			sysinfo.DefaultIP4Interface())
 	}
 
 	if b.Nat6 {
 		s.PostUp6 = fmt.Sprintf("ip6tables -A FORWARD -i %s -j ACCEPT; "+
-			"ip6tables -t nat -A POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP6Interface())
+			"ip6tables -A FORWARD -o %s -j ACCEPT; "+
+			"ip6tables -t nat -A POSTROUTING -o %s -j MASQUERADE",
+			b.InterfaceName,
+			b.InterfaceName,
+			sysinfo.DefaultIP6Interface())
+
 		s.PostDown6 = fmt.Sprintf("ip6tables -D FORWARD -i %s -j ACCEPT; "+
-			"ip6tables -t nat -D POSTROUTING -o %s -j MASQUERADE", b.InterfaceName, sysinfo.DefaultIP6Interface())
+			"ip6tables -D FORWARD -o %s -j ACCEPT; "+
+			"ip6tables -t nat -D POSTROUTING -o %s -j MASQUERADE",
+			b.InterfaceName,
+			b.InterfaceName,
+			sysinfo.DefaultIP6Interface())
 	}
 
 	if b.Nat4 {
