@@ -118,7 +118,7 @@ func (m *DynamicTableList) GetSelected() []string {
 func (m *DynamicTableList) RenderRow(style *lipgloss.Style, row []string, width []int) string {
 	result := ""
 	for i, c := range row {
-		result += style.Copy().Width(width[i]).Render(c)
+		result += style.Width(width[i]).Render(c)
 	}
 	return result
 }

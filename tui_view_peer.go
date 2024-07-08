@@ -105,8 +105,8 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m ViewPeer) View() string {
-	header := theme.Current.ViewerTopBar.Copy().Width(m.sSize.Width)
-	body := theme.Current.ViewerMain.Copy().Width(m.sSize.Width).Height(m.sSize.Height - 2)
+	header := theme.Current.ViewerTopBar.Width(m.sSize.Width)
+	body := theme.Current.ViewerMain.Width(m.sSize.Width).Height(m.sSize.Height - 2)
 
 	f9 := helpKey{key: "F9", help: "QR", hidden: true}
 	if m.qrEnabled {

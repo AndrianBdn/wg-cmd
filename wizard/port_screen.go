@@ -131,7 +131,7 @@ func (m portScreen) View() string {
 		s.xText.Render(bar),
 		s.xText.Render(bar2),
 		s.xText.Render(
-			s.xText.Copy().Width(tw+2).Align(0.5).Inline(true).Render(fmt.Sprintf("PORT %d", m.port)),
+			s.xText.Width(tw+2).Align(0.5).Inline(true).Render(fmt.Sprintf("PORT %d", m.port)),
 		),
 	)
 
@@ -141,6 +141,6 @@ func (m portScreen) View() string {
 		s.xTooltip.Render("ENTER=Continue  4=Set to 4500 5=Set to 51820"),
 	)
 
-	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Copy().Width(m.sSize.Width))
+	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Width(m.sSize.Width))
 	return lipgloss.JoinVertical(0, top, bottom)
 }

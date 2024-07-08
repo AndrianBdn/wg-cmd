@@ -81,16 +81,16 @@ func (m TuiDialogYesNo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m TuiDialogYesNo) View() string {
 	redBg := lipgloss.NewStyle().Background(lipgloss.Color("1"))
-	frameStyle := redBg.Copy().Foreground(lipgloss.Color("0")).Width(44).Padding(1, 2)
-	titleStyle := redBg.Copy().Foreground(lipgloss.Color("11")).Width(40).Align(0.5)
-	msgStyle := redBg.Copy().Foreground(lipgloss.Color("15")).Width(40).Align(0.5).Padding(0, 0, 1, 0)
+	frameStyle := redBg.Foreground(lipgloss.Color("0")).Width(44).Padding(1, 2)
+	titleStyle := redBg.Foreground(lipgloss.Color("11")).Width(40).Align(0.5)
+	msgStyle := redBg.Foreground(lipgloss.Color("15")).Width(40).Align(0.5).Padding(0, 0, 1, 0)
 
 	hStyle := lipgloss.NewStyle().Background(lipgloss.Color("7")).Foreground(lipgloss.Color("0"))
 	hBright := lipgloss.NewStyle().Background(lipgloss.Color("7")).Foreground(lipgloss.Color("15"))
 
-	redYellow := redBg.Copy().Foreground(lipgloss.Color("11"))
+	redYellow := redBg.Foreground(lipgloss.Color("11"))
 
-	btnStyle := redBg.Copy().Width(40).Align(.5)
+	btnStyle := redBg.Width(40).Align(.5)
 
 	yes := redBg.Render("[ ") + redYellow.Render("Y") + redBg.Render("es ]")
 	no := redBg.Render("[ ") + redYellow.Render("N") + redBg.Render("o ]")

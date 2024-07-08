@@ -46,9 +46,9 @@ func (m TuiDialogMsg) View() string {
 }
 
 func InfoView(title, message string) string {
-	frameStyle := theme.Current.DialogBackground.Copy().Width(44).Padding(1, 2)
-	titleStyle := theme.Current.DialogTitle.Copy().Width(40).Align(lipgloss.Left)
-	msgStyle := theme.Current.DialogBackground.Copy().Width(40).Align(lipgloss.Left).Padding(1, 0, 0, 0)
+	frameStyle := theme.Current.DialogBackground.Width(44).Padding(1, 2)
+	titleStyle := theme.Current.DialogTitle.Width(40).Align(lipgloss.Left)
+	msgStyle := theme.Current.DialogBackground.Width(40).Align(lipgloss.Left).Padding(1, 0, 0, 0)
 
 	return frameStyle.Render(
 		lipgloss.JoinVertical(0,
@@ -61,9 +61,9 @@ func InfoView(title, message string) string {
 func ErrorView(title, message string) string {
 	padLR := 2
 	w := 34
-	frameStyle := theme.Current.DialogErrorBackground.Copy().Width(w+padLR*2).Padding(1, 2)
-	titleStyle := theme.Current.DialogErrorTitle.Copy().Width(w).Align(lipgloss.Center)
-	msgStyle := theme.Current.DialogErrorMessage.Copy().Width(w).Align(lipgloss.Center).Padding(1, 0)
+	frameStyle := theme.Current.DialogErrorBackground.Width(w+padLR*2).Padding(1, 2)
+	titleStyle := theme.Current.DialogErrorTitle.Width(w).Align(lipgloss.Center)
+	msgStyle := theme.Current.DialogErrorMessage.Width(w).Align(lipgloss.Center).Padding(1, 0)
 
 	return frameStyle.Render(
 		lipgloss.JoinVertical(0,

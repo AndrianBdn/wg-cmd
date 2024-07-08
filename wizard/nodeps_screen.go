@@ -81,6 +81,6 @@ func (m noDepsScreen) View() string {
 		s.xTooltip.Render("ENTER=Continue"),
 	)
 
-	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Copy().Width(m.sSize.Width))
+	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Width(m.sSize.Width))
 	return lipgloss.JoinVertical(0, top, bottom)
 }

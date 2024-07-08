@@ -25,7 +25,7 @@ func newInterfaceScreen(app *app.App, sSize tea.WindowSizeMsg) interfaceScreen {
 	ti.Width = 4
 	ti.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244")).Background(lipgloss.Color("7"))
 	ti.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("7"))
-	ti.CursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
+	ti.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
 	ti.Prompt = ""
 
 	return interfaceScreen{
@@ -102,6 +102,6 @@ func (m interfaceScreen) View() string {
 		s.xTooltip.Render("ENTER=Continue  F3=Quit"),
 	)
 
-	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Copy().Width(m.sSize.Width))
+	top = tutils.HPad(top, m.sSize.Height-lipgloss.Height(bottom), s.xColor.Width(m.sSize.Width))
 	return lipgloss.JoinVertical(0, top, bottom)
 }

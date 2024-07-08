@@ -37,10 +37,10 @@ func NewTuiDialogName() TuiDialogField {
 	ti.CharLimit = 30
 	ti.Width = 50
 	ti.TextStyle = theme.Current.DialogInput
-	ti.CursorStyle = theme.Current.DialogInputCursor
+	ti.Cursor.Style = theme.Current.DialogInputCursor
 	ti.Prompt = ""
 	ti.Focus()
-	ti.SetCursorMode(textinput.CursorBlink)
+	ti.Cursor.Blink = true
 
 	m.field = ti
 	m.buttonOK1 = " OK "
@@ -123,10 +123,9 @@ func (m TuiDialogField) View() string {
 		return ErrorView("Error", m.validationError)
 	}
 
-	frameStyle := theme.Current.DialogBackground.Copy().Width(54).Padding(1, 2)
-	titleStyle := theme.Current.DialogTitle.Copy().Width(50).Align(0.5)
+	frameStyle := theme.Current.DialogBackground.Width(54).Padding(1, 2)
+	titleStyle := theme.Current.DialogTitle.Width(50).Align(0.5)
 	questionStyle := lipgloss.NewStyle().Width(50)
-	//.Background(lipgloss.Color("7")).Foreground(lipgloss.Color("0")).Width(50)
 
 	return frameStyle.Render(
 		lipgloss.JoinVertical(0,
@@ -139,7 +138,7 @@ func (m TuiDialogField) View() string {
 }
 
 func (m TuiDialogField) RenderButtons() string {
-	bg := theme.Current.DialogBackground.Copy().Align(lipgloss.Center).Width(50)
+	bg := theme.Current.DialogBackground.Align(lipgloss.Center).Width(50)
 	renderButton := func(text string, hl bool) string {
 		firstLetter := text[0:1]
 		restText := text[1:]

@@ -12,7 +12,7 @@ type helpKey struct {
 }
 
 func (h helpKey) Render() string {
-	b := theme.Current.HelpLineHelp.Copy().Width(12)
+	b := theme.Current.HelpLineHelp.Width(12)
 	return theme.Current.HelpLineKey.Render(h.key) + b.Render(h.help)
 }
 
@@ -28,5 +28,5 @@ func RenderHelpLine(w int, keys ...helpKey) string {
 		}
 	}
 	bw := w - lipgloss.Width(helpline)
-	return theme.Current.HelpLineBackground.Copy().Width(bw).Render(" ") + helpline
+	return theme.Current.HelpLineBackground.Width(bw).Render(" ") + helpline
 }

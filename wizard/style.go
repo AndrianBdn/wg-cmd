@@ -17,12 +17,12 @@ func newStyleSize(sSize tea.WindowSizeMsg) *style {
 	s := style{}
 
 	s.xColor = lipgloss.NewStyle().Background(lipgloss.Color("4")).Foreground(lipgloss.Color("7"))
-	s.xStyleBase = s.xColor.Copy().Width(sSize.Width).PaddingRight(3)
+	s.xStyleBase = s.xColor.Width(sSize.Width).PaddingRight(3)
 	s.xTooltip = lipgloss.NewStyle().
 		Background(lipgloss.Color("7")).Foreground(lipgloss.Color("0")).
 		Width(sSize.Width).PaddingLeft(2)
-	s.xText = s.xStyleBase.Copy().PaddingLeft(3)
-	s.xList = s.xText.Copy().PaddingLeft(6)
+	s.xText = s.xStyleBase.PaddingLeft(3)
+	s.xList = s.xText.PaddingLeft(6)
 
 	return &s
 }
