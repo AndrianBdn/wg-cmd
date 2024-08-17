@@ -259,7 +259,9 @@ func (m MainScreen) Help() (tea.Model, tea.Cmd) {
 
 	m.dialog = NewTuiDialogMsg(
 		"WG Commander",
-		"version "+ver+"\n\n(c) 2023 by Andrian Budantsov\n\n"+
+		"version "+ver+"\n\n"+
+			"(c) 2023-2024 by Andrian Budantsov\n"+
+			"              and GitHub contributors\n\n"+
 			theme.Current.DialogButtonFocus.Render("https://github.com/andrianbdn/wg-cmd")+
 			"\n\n"+
 			"Comes with ABSOLUTELY NO WARRANTY, distributed under the terms of\nthe MIT license.",
