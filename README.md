@@ -17,7 +17,7 @@ aka "wg-cmd" — TUI for managing WireGuard configuration files
 - automatically configures sysctl, systemd, NAT
 
 ## Current Limitations
-- supports only simple client-server WireGuard setup
+- supports simple client-server WireGuard setup
 - mostly for Linux (assumes iptables, systemd, sysctl are available) — see [Other OS](#other-os-besides-linux) section
 - can't manage existing WireGuard configuration (but you can create new WireGuard interfaces on the same host)
 
@@ -29,10 +29,10 @@ Make sure you have WireGuard and iptables installed
 To download using curl run:
 ```shell
 # for x86_64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.5/wg-cmd-0.1.5-linux-amd64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.6/wg-cmd-0.1.6-linux-amd64 -o /usr/local/bin/wg-cmd
 
 # for arm64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.5/wg-cmd-0.1.5-linux-arm64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.6/wg-cmd-0.1.6-linux-arm64 -o /usr/local/bin/wg-cmd
 ```
 
 Set proper permissions and run the tool: 
@@ -67,7 +67,7 @@ WireguardDir = "/etc/wireguard"
 # directory for WireGuard configuration files 
 
 DatabaseDir = "/etc/wireguard"
-# directory for WG Commander database files (wgc-<interface-name>
+# directory for WG Commander database files (wgc-<interface-name>)
 ```
 
 You can change these options to point to directories that you have write access to.
@@ -165,6 +165,7 @@ WG Commander should work well on any systemd-based Linux
 distribution with WireGuard, iptables, sysctl, procfs available.
 
 It was tested on:
+- Ubuntu 24.04 (v0.1.6 tested on Aug 17 2024)
 - Ubuntu 20.04
 - Ubuntu 22.04
 - Rocky Linux 9
