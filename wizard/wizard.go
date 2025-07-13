@@ -184,7 +184,7 @@ func (m RootModel) presentDNSDialog() (tea.Model, tea.Cmd) {
 		{"opendns", "Use OpenDNS https://use.opendns.com/"},
 	}
 
-	// shuffle options, so no service will get default treatment (on avarage)
+	// shuffle options, so no service will get default treatment (on average)
 	rand.Shuffle(len(opts), func(i, j int) { opts[i], opts[j] = opts[j], opts[i] })
 
 	opts = append(opts, opt{"", "Do not setup any DNS for clients (may cause leakage)"})
