@@ -173,6 +173,10 @@ It was tested on:
 - Debian 11
 - Debian 12
 
+# Contributing
+
+Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, including our AI disclosure policy.
+
 # Notes 
 There is no commercial purpose behind WG Commander. 
 The project is licensed under 
