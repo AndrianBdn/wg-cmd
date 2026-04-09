@@ -127,11 +127,13 @@ func (m TuiDialogField) View() string {
 	titleStyle := theme.Current.DialogTitle.Width(50).Align(0.5)
 	questionStyle := lipgloss.NewStyle().Width(50)
 
+	fieldStyle := theme.Current.DialogInput.Width(50)
+
 	return frameStyle.Render(
 		lipgloss.JoinVertical(0,
 			titleStyle.Render(m.Title),
 			questionStyle.Render(m.Question),
-			m.field.View(),
+			fieldStyle.Render(m.field.View()),
 			m.RenderButtons(),
 		),
 	)

@@ -14,6 +14,7 @@ aka "wg-cmd" — TUI for managing WireGuard configuration files
 - has a nice Setup Wizard
 - text-based user interface for managing peers
 - view QR code in the terminal
+- copy configuration to clipboard (OSC 52)
 - automatically configures sysctl, systemd, NAT
 
 ## Current Limitations

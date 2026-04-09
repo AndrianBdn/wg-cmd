@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/andrianbdn/wg-cmd/app"
 	"github.com/andrianbdn/wg-cmd/backend"
@@ -11,11 +12,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mdp/qrterminal/v3"
+	"github.com/muesli/termenv"
 )
 
 type qr struct {
 	qrCode string
 	size   int
+}
+
+type viewPeerCopiedMsg struct {
+	seq int
 }
 
 type ViewPeer struct {
@@ -26,6 +32,8 @@ type ViewPeer struct {
 	qrMode    bool
 	qrCodes   []qr
 	app       *app.App
+	copied    bool
+	copySeq   int
 }
 
 func NewViewPeer(sSize tea.WindowSizeMsg, app *app.App, cl *backend.Client) ViewPeer {
@@ -83,9 +91,13 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sSize = msg
 	}
 
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
+	case viewPeerCopiedMsg:
+		if msg.seq == m.copySeq {
+			m.copied = false
+		}
+		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEscape, tea.KeyF10:
@@ -99,15 +111,31 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.app.Settings.ViewerQRMode = m.qrMode
 			_ = m.app.SaveSettings()
 			return m, nil
+
+		case tea.KeyRunes:
+			switch string(msg.Runes) {
+			case "c", "C":
+				termenv.DefaultOutput().Copy(m.config)
+				m.copySeq++
+				m.copied = true
+				seq := m.copySeq
+				return m, tea.Tick(2*time.Second, func(time.Time) tea.Msg {
+					return viewPeerCopiedMsg{seq: seq}
+				})
+			}
 		}
 	}
-	return m, cmd
+	return m, nil
 }
 
 func (m ViewPeer) View() string {
 	header := theme.Current.ViewerTopBar.Width(m.sSize.Width)
 	body := theme.Current.ViewerMain.Width(m.sSize.Width).Height(m.sSize.Height - 2)
 
+	cKey := helpKey{key: "C", help: "Clipboard"}
+	if m.copied {
+		cKey.help = "Copied!"
+	}
 	f9 := helpKey{key: "F9", help: "QR", hidden: true}
 	if m.qrEnabled {
 		if m.qrMode {
@@ -130,7 +158,7 @@ func (m ViewPeer) View() string {
 	return lipgloss.JoinVertical(0,
 		header.Render(m.title),
 		body.Render(config),
-		RenderHelpLine(m.sSize.Width, f9, f10),
+		RenderHelpLine(m.sSize.Width, cKey, f9, f10),
 	)
 }
 
