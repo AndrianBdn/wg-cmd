@@ -30,10 +30,10 @@ Make sure you have WireGuard and iptables installed
 To download using curl run:
 ```shell
 # for x86_64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.6/wg-cmd-0.1.6-linux-amd64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.7/wg-cmd-0.1.7-linux-amd64 -o /usr/local/bin/wg-cmd
 
 # for arm64 
-curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.6/wg-cmd-0.1.6-linux-arm64 -o /usr/local/bin/wg-cmd
+curl -SL https://github.com/andrianbdn/wg-cmd/releases/download/v0.1.7/wg-cmd-0.1.7-linux-arm64 -o /usr/local/bin/wg-cmd
 ```
 
 Set proper permissions and run the tool: 
@@ -166,7 +166,7 @@ WG Commander should work well on any systemd-based Linux
 distribution with WireGuard, iptables, sysctl, procfs available.
 
 It was tested on:
-- Ubuntu 24.04 (v0.1.6 tested on Aug 17 2024)
+- Ubuntu 24.04 (v0.1.7 tested on Apr 9 2026)
 - Ubuntu 20.04
 - Ubuntu 22.04
 - Rocky Linux 9
