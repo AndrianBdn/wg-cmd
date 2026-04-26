@@ -172,6 +172,7 @@ It was tested on:
 - Rocky Linux 9
 - Debian 11
 - Debian 12
+- Debian 13 (v0.1.7 tested on Apr 26 2026)
 
 # Contributing
 
