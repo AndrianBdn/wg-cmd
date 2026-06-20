@@ -68,6 +68,41 @@ func (s *State) AddPeer(peerName string) error {
 	return nil
 }
 
+func (s *State) CanRenamePeer(idx int, newName string) error {
+	r := regexp.MustCompile(`^` + PeerNameRegExp + `$`)
+	if !r.MatchString(newName) {
+		return fmt.Errorf("<peer_name> must start with letter, contain only letters, numbers, underscore, dash")
+	}
+
+	for ip, excl := range s.Clients {
+		if ip != idx && excl.GetName() == newName {
+			return fmt.Errorf("peer name %s is already used by %s", newName, excl.GetFileName())
+		}
+	}
+
+	return nil
+}
+
+func (s *State) RenamePeer(idx int, newName string) error {
+	cl := s.Clients[idx]
+	if cl == nil {
+		return fmt.Errorf("peer not found")
+	}
+
+	if err := s.CanRenamePeer(idx, newName); err != nil {
+		return err
+	}
+
+	newFileName := clientFileName(cl.ipNum, newName)
+	if err := os.Rename(filepath.Join(s.dir, cl.fileName), filepath.Join(s.dir, newFileName)); err != nil {
+		return fmt.Errorf("can't rename %s to %s: %w", cl.fileName, newFileName, err)
+	}
+
+	cl.name = newName
+	cl.fileName = newFileName
+	return nil
+}
+
 func (s *State) DeletePeer(idx int) error {
 	cl := s.Clients[idx]
 	if cl == nil {

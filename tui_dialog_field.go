@@ -9,7 +9,10 @@ import (
 
 type (
 	TuiDialogCancel struct{}
-	TuiDialogValue  string
+	TuiDialogValue  struct {
+		Value   string
+		Context any
+	}
 )
 
 const (
@@ -21,6 +24,7 @@ const (
 type TuiDialogField struct {
 	Title           string
 	Question        string
+	Context         any
 	buttonOK1       string
 	buttonCancel2   string
 	ValidationFunc  func(string) string
@@ -107,8 +111,9 @@ func (m TuiDialogField) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.validationError = m.ValidationFunc(m.field.Value())
 			if m.validationError == "" {
 				v := m.field.Value()
+				ctx := m.Context
 				return m, func() tea.Msg {
-					return TuiDialogValue(v)
+					return TuiDialogValue{Value: v, Context: ctx}
 				}
 			}
 		}

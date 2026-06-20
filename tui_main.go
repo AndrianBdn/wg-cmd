@@ -32,6 +32,7 @@ func NewMainScreen(app *app.App, sSize tea.WindowSizeMsg) MainScreen {
 	helpKeys := []helpKey{
 		{key: "F1", help: "About"},
 		{key: "F4", help: "Edit"},
+		{key: "F6", help: "Rename"},
 		{key: "F7", help: "Add Peer"},
 		{key: "F8", help: "Delete Peer"},
 		{key: "F10", help: "Quit"},
@@ -81,8 +82,10 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dialog = nil
 
 	case TuiDialogValue:
-		peer := string(msg)
-		return m.ReallyAddPeer(peer), nil
+		if ctx, ok := msg.Context.(renamePeerContext); ok {
+			return m.ReallyRenamePeer(int(ctx), msg.Value), nil
+		}
+		return m.ReallyAddPeer(msg.Value), nil
 
 	case TuiDialogCancel:
 		_ = msg
@@ -106,6 +109,9 @@ func (m MainScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyF4:
 			return m.EditCurrentItem()
+
+		case tea.KeyF6:
+			return m.RenamePeer()
 
 		case tea.KeyF10:
 			if m.exitBanner == exitBannerShouldShow {
@@ -196,6 +202,38 @@ func (m MainScreen) CreatePeer() (tea.Model, tea.Cmd) {
 	return m, d.Init()
 }
 
+type renamePeerContext int
+
+func (m MainScreen) RenamePeer() (tea.Model, tea.Cmd) {
+	row := m.table.GetSelectedIndex()
+	if row == 0 {
+		m.dialog = NewTuiDialogMsg("Error", "Renaming the server is currently not supported", true)
+		return m, m.dialog.Init()
+	}
+
+	peer := clientFromRow(m.app, m.table.GetSelected())
+	if peer == nil {
+		return m, nil
+	}
+
+	d := NewTuiDialogName()
+	d.Title = "Rename Peer"
+	d.Question = "Enter a new peer name"
+	d.Context = renamePeerContext(peer.GetIPNumber())
+	d.field.SetValue(peer.GetName())
+	d.ValidationFunc = func(s string) string {
+		if s == "" {
+			return "cannot be empty"
+		}
+		if err := m.app.State.CanRenamePeer(peer.GetIPNumber(), s); err != nil {
+			return err.Error()
+		}
+		return ""
+	}
+	m.dialog = d
+	return m, d.Init()
+}
+
 func (m MainScreen) DeletePeer() (tea.Model, tea.Cmd) {
 	row := m.table.GetSelectedIndex()
 	if row == 0 {
@@ -216,6 +254,19 @@ func (m MainScreen) ReallyAddPeer(name string) MainScreen {
 	err := m.app.State.AddPeer(name)
 	if err != nil {
 		log.Println("Error adding peer", err)
+	}
+	if err == nil {
+		m.app.GenerateWireguardConfigLog()
+	}
+	m.dialog = nil
+	m.table = newAppDynamicTableList(m.app, &m.table)
+	return m
+}
+
+func (m MainScreen) ReallyRenamePeer(ipNum int, newName string) MainScreen {
+	err := m.app.State.RenamePeer(ipNum, newName)
+	if err != nil {
+		log.Println("Error renaming peer", err)
 	}
 	if err == nil {
 		m.app.GenerateWireguardConfigLog()

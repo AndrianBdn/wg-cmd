@@ -37,8 +37,12 @@ func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, e
 	return &c, nil
 }
 
+func clientFileName(ip int, name string) string {
+	return fmt.Sprintf("%04d-%s.toml", ip, name)
+}
+
 func NewClient(ip int, name string) *Client {
-	fileName := fmt.Sprintf("%04d-%s.toml", ip, name)
+	fileName := clientFileName(ip, name)
 	c := Client{ipNum: ip, name: name, fileName: fileName}
 	key, err := wgtypes.GeneratePrivateKey()
 	if err != nil {
