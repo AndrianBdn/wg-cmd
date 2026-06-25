@@ -3,17 +3,17 @@ module github.com/andrianbdn/wg-cmd
 go 1.25.0
 
 require (
-	github.com/BurntSushi/toml v1.4.0
-	github.com/adrg/xdg v0.5.0
+	github.com/BurntSushi/toml v1.6.0
+	github.com/adrg/xdg v0.5.3
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/leaanthony/go-ansi-parser v1.6.1
 	github.com/lithammer/dedent v1.1.0
-	github.com/mdp/qrterminal/v3 v3.2.0
+	github.com/mdp/qrterminal/v3 v3.2.1
 	github.com/muesli/termenv v0.16.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20230429144221-925a1e7659e6
-	gotest.tools/v3 v3.4.0
+	gotest.tools/v3 v3.5.2
 )
 
 require (
