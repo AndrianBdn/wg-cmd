@@ -1,11 +1,10 @@
+# Dependabot is used for SECURITY updates only.
+# Security update PRs come from the repo's "Dependabot security updates" setting.
+# Routine (non-security) version updates are disabled via open-pull-requests-limit: 0.
 version: 2
 updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "weekly"
-    groups:
-      go-modules:
-        update-types:
-          - "minor"
-          - "patch"
+    open-pull-requests-limit: 0
