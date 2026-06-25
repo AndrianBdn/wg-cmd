@@ -39,7 +39,9 @@ func NewTuiDialogName() TuiDialogField {
 	ti := textinput.New()
 	ti.Placeholder = ""
 	ti.CharLimit = 30
-	ti.Width = 50
+	// bubbles v1.0.0 renders the input as Width+1 cells (cursor cell plus a full
+	// Width of padding), so use 49 to fit the 50-cell dialog body without wrapping.
+	ti.Width = 49
 	ti.TextStyle = theme.Current.DialogInput
 	ti.Cursor.Style = theme.Current.DialogInputCursor
 	ti.Prompt = ""
