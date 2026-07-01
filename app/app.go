@@ -53,6 +53,17 @@ func NewApp() *App {
 		os.Exit(1)
 	}
 
+	if a.State == nil {
+		// No interface loaded: we're about to launch the setup wizard, which
+		// needs a writable database directory. If it isn't (e.g. a normal user
+		// pointed at the default /etc/wireguard), show a clear error instead of
+		// a wizard the user can't complete.
+		if msg := a.wizardDirError(); msg != "" {
+			fmt.Println(msg)
+			os.Exit(1)
+		}
+	}
+
 	return &a
 }
 
@@ -116,6 +127,35 @@ func (a *App) ValidateIfaceArg(ifName string) string {
 
 	if sysinfo.NetworkInterfaceExists(ifName) {
 		return "Network interface exists in routing tables. Try a different name."
+	}
+
+	return ""
+}
+
+// wizardDirError returns a user-facing message when the setup wizard cannot
+// run because its database directory is missing or not writable by the current
+// user. It returns "" when the directory is usable.
+func (a *App) wizardDirError() string {
+	dir := a.Settings.DatabaseDir
+
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return fmt.Sprintf("Directory %s does not exist.\n"+
+			"Install WireGuard or create the directory before running setup.", dir)
+	}
+	if err != nil {
+		return fmt.Sprintf("Can't access %s: %s", dir, err)
+	}
+	if !info.IsDir() {
+		return fmt.Sprintf("%s is not a directory.", dir)
+	}
+
+	if w := testIfDirWritable(dir); w != "" {
+		msg := fmt.Sprintf("Directory %s is not writable by the current user.", dir)
+		if os.Geteuid() != 0 {
+			msg += fmt.Sprintf("\nThis usually needs root — try: sudo %s", os.Args[0])
+		}
+		return msg
 	}
 
 	return ""
