@@ -38,7 +38,10 @@ func NewTuiDialogName() TuiDialogField {
 
 	ti := textinput.New()
 	ti.Placeholder = ""
-	ti.CharLimit = 30
+	// Fits typical email-style names; the input scrolls horizontally past the
+	// visible Width. Kept well under the filesystem 255-byte file-name limit
+	// once the "NNNN-" prefix and ".toml" suffix are added.
+	ti.CharLimit = 60
 	// bubbles v1.0.0 renders the input as Width+1 cells (cursor cell plus a full
 	// Width of padding), so use 49 to fit the 50-cell dialog body without wrapping.
 	ti.Width = 49

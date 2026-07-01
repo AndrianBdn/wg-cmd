@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -73,6 +74,67 @@ func TestState_RenamePeer(t *testing.T) {
 	// invalid names must be rejected
 	if err := s.RenamePeer(12, "bad/name"); err == nil {
 		t.Fatal("expected error renaming to invalid name, got nil")
+	}
+}
+
+// TestState_EmailPeerNameRoundTrip makes sure an email-style peer name (dots
+// and an @) survives being written to a NNNN-<name>.toml file and read back
+// from disk, and that path-unsafe names are still rejected.
+func TestState_EmailPeerNameRoundTrip(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.CopyFS(dir, os.DirFS("testdata/wgc-wg3")); err != nil {
+		t.Fatal(err)
+	}
+
+	s, err := ReadState(dir, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const email = "john.doe@example.com"
+	if err := s.AddPeer(email); err != nil {
+		t.Fatalf("AddPeer(%q): %v", email, err)
+	}
+
+	// path separators must never be accepted (would escape the interface dir)
+	if err := s.AddPeer("john/../../etc"); err == nil {
+		t.Fatal("expected error for name with slash, got nil")
+	}
+
+	// consecutive dots are rejected (defense-in-depth; no valid email has them)
+	if err := s.AddPeer("john..doe@example.com"); err == nil {
+		t.Fatal("expected error for name with consecutive dots, got nil")
+	}
+
+	// email:device convention (colon) is allowed and must round-trip too
+	const device = "bob@corp.com:laptop"
+	if err := s.AddPeer(device); err != nil {
+		t.Fatalf("AddPeer(%q): %v", device, err)
+	}
+
+	// re-read from disk: the file names must parse back to the exact names
+	s2, err := ReadState(dir, nil)
+	if err != nil {
+		t.Fatalf("re-read state: %v", err)
+	}
+
+	for name, wantFile := range map[string]string{
+		email:  "0012-" + email + ".toml",
+		device: "0013-" + device + ".toml",
+	} {
+		var found *Client
+		for _, c := range s2.Clients {
+			if c.GetName() == name {
+				found = c
+				break
+			}
+		}
+		if found == nil {
+			t.Fatalf("peer %q not found after re-reading state from disk", name)
+		}
+		if found.GetFileName() != wantFile {
+			t.Fatalf("expected file %q, got %q", wantFile, found.GetFileName())
+		}
 	}
 }
 

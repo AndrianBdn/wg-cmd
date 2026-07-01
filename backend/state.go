@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -9,9 +10,36 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 )
 
-const PeerNameRegExp = `([A-Za-z][0-9A-Za-z-_]*)`
+// PeerNameRegExp defines allowed peer names. A name must start with a letter
+// and may then contain letters, digits and the safe punctuation used in email
+// addresses plus a colon, so an "email:device" convention works (e.g.
+// alice@corp.com:laptop). The name is embedded in the per-peer file name
+// (NNNN-<name>.toml), so it must never contain a path separator; requiring a
+// leading letter also rules out "." and ".." names. Colons are legal in file
+// names on the Linux/macOS targets (not on Windows, which is not supported).
+const PeerNameRegExp = `([A-Za-z][0-9A-Za-z._@:+-]*)`
+
+const peerNameRule = "<peer_name> must start with a letter and contain only " +
+	"letters, numbers, and . _ - + @ :"
+
+var peerNameInputRe = regexp.MustCompile(`^` + PeerNameRegExp + `$`)
+
+// validatePeerName reports whether name is an acceptable peer name. The regexp
+// already guarantees a path-safe name (leading letter, no separators), so
+// rejecting consecutive dots is defense-in-depth rather than strictly required:
+// no valid email contains ".." either, so it costs nothing legitimate.
+func validatePeerName(name string) error {
+	if !peerNameInputRe.MatchString(name) {
+		return errors.New(peerNameRule)
+	}
+	if strings.Contains(name, "..") {
+		return errors.New("<peer_name> must not contain consecutive dots (..)")
+	}
+	return nil
+}
 
 type State struct {
 	dir     string
@@ -24,9 +52,8 @@ func (s *State) JoinPath(path string) string {
 }
 
 func (s *State) CanAddPeer(peerName string) (int, error) {
-	r := regexp.MustCompile(`^` + PeerNameRegExp + `$`)
-	if !r.MatchString(peerName) {
-		return -1, fmt.Errorf("<peer_name> must start with letter, contain only letters, numbers, underscore, dash")
+	if err := validatePeerName(peerName); err != nil {
+		return -1, err
 	}
 
 	for _, excl := range s.Clients {
@@ -69,9 +96,8 @@ func (s *State) AddPeer(peerName string) error {
 }
 
 func (s *State) CanRenamePeer(idx int, newName string) error {
-	r := regexp.MustCompile(`^` + PeerNameRegExp + `$`)
-	if !r.MatchString(newName) {
-		return fmt.Errorf("<peer_name> must start with letter, contain only letters, numbers, underscore, dash")
+	if err := validatePeerName(newName); err != nil {
+		return err
 	}
 
 	for ip, excl := range s.Clients {
