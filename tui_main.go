@@ -252,26 +252,28 @@ func (m MainScreen) DeletePeer() (tea.Model, tea.Cmd) {
 
 func (m MainScreen) ReallyAddPeer(name string) MainScreen {
 	err := m.app.State.AddPeer(name)
-	if err != nil {
-		log.Println("Error adding peer", err)
-	}
 	if err == nil {
-		m.app.GenerateWireguardConfigLog()
+		_, err = m.app.GenerateWireguardConfig()
 	}
 	m.dialog = nil
+	if err != nil {
+		log.Println("Error adding peer", err)
+		m.dialog = NewTuiDialogMsg("Error", err.Error(), true)
+	}
 	m.table = newAppDynamicTableList(m.app, &m.table)
 	return m
 }
 
 func (m MainScreen) ReallyRenamePeer(ipNum int, newName string) MainScreen {
 	err := m.app.State.RenamePeer(ipNum, newName)
-	if err != nil {
-		log.Println("Error renaming peer", err)
-	}
 	if err == nil {
-		m.app.GenerateWireguardConfigLog()
+		_, err = m.app.GenerateWireguardConfig()
 	}
 	m.dialog = nil
+	if err != nil {
+		log.Println("Error renaming peer", err)
+		m.dialog = NewTuiDialogMsg("Error", err.Error(), true)
+	}
 	m.table = newAppDynamicTableList(m.app, &m.table)
 	return m
 }
@@ -282,19 +284,19 @@ func (m MainScreen) ReallyDeletePeer() MainScreen {
 		panic("we don't delete server")
 	}
 
+	m.dialog = nil
 	peer := clientFromRow(m.app, m.table.GetSelected())
 	if peer != nil {
 		err := m.app.State.DeletePeer(peer.GetIPNumber())
+		if err == nil {
+			m.table.DeleteSelectedRow()
+			_, err = m.app.GenerateWireguardConfig()
+		}
 		if err != nil {
 			log.Println("Error deleting peer", err)
+			m.dialog = NewTuiDialogMsg("Error", err.Error(), true)
 		}
-		if err == nil {
-			m.app.GenerateWireguardConfigLog()
-		}
-
-		m.table.DeleteSelectedRow()
 	}
-	m.dialog = nil
 	return m
 }
 

@@ -116,6 +116,10 @@ func (m portScreen) View() string {
 	)
 
 	tw := m.sSize.Width - 3 - 3 - 2
+	if tw < 2 {
+		// keep strings.Repeat counts non-negative on absurdly narrow terminals
+		tw = 2
+	}
 	lr := tw * int(m.port) / math.MaxUint16
 	rr := tw - lr - 1
 	if rr < 0 {

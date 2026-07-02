@@ -73,6 +73,9 @@ func (m TuiDialogField) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.validationError = ""
 				return m, textinput.Blink
 			}
+			// swallow everything else so keystrokes don't reach the
+			// hidden field or move focus while the error box is shown
+			return m, nil
 		}
 	}
 

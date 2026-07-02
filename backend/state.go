@@ -23,7 +23,7 @@ import (
 const PeerNameRegExp = `([A-Za-z][0-9A-Za-z._@:+-]*)`
 
 const peerNameRule = "<peer_name> must start with a letter and contain only " +
-	"letters, numbers, and . _ - + @ :"
+	"letters, numbers, and the . _ - + @ : characters"
 
 var peerNameInputRe = regexp.MustCompile(`^` + PeerNameRegExp + `$`)
 
@@ -233,6 +233,10 @@ func ReadState(dir string, wlog *log.Logger) (*State, error) {
 		}
 		if ip > 4094 {
 			return nil, fmt.Errorf("at the moment wg-cmd only supports 4094 peers (/20 subnet)")
+		}
+		if ip < 2 {
+			return nil, fmt.Errorf("file %s: peer numbers 0000 and 0001 are reserved "+
+				"(network and server addresses), peer numbering starts at 0002", f.Name())
 		}
 		if _, ok := cls[ip]; ok {
 			return nil, fmt.Errorf("conflicting files %s and %s", f.Name(), cls[ip].fileName)

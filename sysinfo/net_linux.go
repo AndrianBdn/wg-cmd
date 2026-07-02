@@ -3,6 +3,7 @@
 package sysinfo
 
 import (
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -21,6 +22,16 @@ type procNetIPV6RouteLine struct {
 }
 
 func NetworkInterfaceExists(iface string) bool {
+	// link devices first: a down, address-less interface (e.g. a leftover
+	// "ip link add wg1 type wireguard") has no routes but still exists
+	if ifs, err := net.Interfaces(); err == nil {
+		for _, ifc := range ifs {
+			if ifc.Name == iface {
+				return true
+			}
+		}
+	}
+
 	ifls4, err := readProcNetRoute()
 	if err == nil {
 		for _, ifl := range ifls4 {

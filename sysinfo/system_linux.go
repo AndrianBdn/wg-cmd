@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func HasSystemd() bool {
@@ -28,6 +29,11 @@ func NatEnabledIPv6() bool {
 }
 
 func EnableNat(ip4, ip6 bool) error {
+	if !ip4 && !ip6 {
+		// nothing to change; in particular don't run "sysctl -p", which can
+		// fail on unrelated stale keys in the user's sysctl.conf
+		return nil
+	}
 	if ip4 {
 		if err := writeLineToSysctlConf("net.ipv4.ip_forward=1"); err != nil {
 			return err
@@ -38,16 +44,49 @@ func EnableNat(ip4, ip6 bool) error {
 			return err
 		}
 	}
+	if sysctlPath() == "" {
+		// no sysctl binary: apply the settings directly so they take effect
+		// now; the sysctl.conf lines above keep them across reboots
+		if ip4 {
+			if err := os.WriteFile("/proc/sys/net/ipv4/ip_forward", []byte("1\n"), 0o644); err != nil {
+				return fmt.Errorf("failed to enable IPv4 forwarding: %w", err)
+			}
+		}
+		if ip6 {
+			if err := os.WriteFile("/proc/sys/net/ipv6/conf/all/forwarding", []byte("1\n"), 0o644); err != nil {
+				return fmt.Errorf("failed to enable IPv6 forwarding: %w", err)
+			}
+		}
+		return nil
+	}
 	return reloadSysctl()
 }
 
+// writeLineToSysctlConf appends line to /etc/sysctl.conf. It never rewrites
+// existing content: if the exact setting is already present it does nothing,
+// and if the file lacks a trailing newline one is added before the new line
+// so we don't merge with (and corrupt) the user's last entry.
 func writeLineToSysctlConf(line string) error {
+	existing, err := os.ReadFile("/etc/sysctl.conf")
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read /etc/sysctl.conf: %w", err)
+	}
+	for _, l := range strings.Split(string(existing), "\n") {
+		if strings.TrimSpace(l) == line {
+			return nil
+		}
+	}
+	payload := line + "\n"
+	if len(existing) > 0 && existing[len(existing)-1] != '\n' {
+		payload = "\n" + payload
+	}
+
 	f, err := os.OpenFile("/etc/sysctl.conf", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to open /etc/sysctl.conf: %w", err)
 	}
 	defer f.Close()
-	_, err = f.WriteString(line + "\n")
+	_, err = f.WriteString(payload)
 	return err
 }
 

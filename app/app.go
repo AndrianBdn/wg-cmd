@@ -70,6 +70,10 @@ func NewApp() *App {
 func (a *App) RunCli() {
 	// we currently only support "make" command to rebuild Wireguard config
 	if a.Settings.cliCommand == "make" {
+		if a.State == nil {
+			fmt.Printf("No interface selected. Run \"%s <wg-interface> make\"\n", os.Args[0])
+			os.Exit(1)
+		}
 		path, err := a.GenerateWireguardConfig()
 		if err != nil {
 			fmt.Println("Error making WireGuard config:", err)

@@ -53,7 +53,10 @@ func (m doneScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if err == nil {
 						m.app.Settings.DefaultInterface = m.blueprint.InterfaceName
 						_ = m.app.SaveSettings()
-						_, _ = m.app.GenerateWireguardConfig()
+						_, err = m.app.GenerateWireguardConfig()
+					}
+					if err != nil {
+						m.lastError = err.Error()
 					}
 				}
 				m.pressEnter = true

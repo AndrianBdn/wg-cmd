@@ -18,6 +18,7 @@ import (
 type qr struct {
 	qrCode string
 	size   int
+	width  int
 }
 
 type viewPeerCopiedMsg struct {
@@ -106,6 +107,9 @@ func (m ViewPeer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case tea.KeyF9:
+			if !m.qrEnabled {
+				return m, nil
+			}
 			m.qrMode = !m.qrMode
 
 			m.app.Settings.ViewerQRMode = m.qrMode
@@ -148,7 +152,7 @@ func (m ViewPeer) View() string {
 	config := m.config
 	if m.qrMode {
 		for _, q := range m.qrCodes {
-			if q.size < m.sSize.Height-1 {
+			if q.size < m.sSize.Height-1 && q.width <= m.sSize.Width {
 				config = q.qrCode
 				break
 			}
@@ -166,5 +170,5 @@ func qrGenerate(cb func(io.Writer)) qr {
 	buf := bytes.NewBuffer(nil)
 	cb(buf)
 	q := strings.TrimSpace(buf.String())
-	return qr{qrCode: q, size: lipgloss.Height(q)}
+	return qr{qrCode: q, size: lipgloss.Height(q), width: lipgloss.Width(q)}
 }

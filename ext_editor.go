@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os/exec"
+	"strings"
 
 	"github.com/andrianbdn/wg-cmd/backend"
 	"github.com/andrianbdn/wg-cmd/sysinfo"
@@ -25,7 +26,9 @@ func newExtEditorState(file string, editServer bool) extEditorState {
 }
 
 func (e *extEditorState) launchEditor() tea.Cmd {
-	cmd := exec.Command(e.editor, e.file)
+	// $EDITOR may carry arguments (e.g. "code --wait"); split them off
+	parts := strings.Fields(e.editor)
+	cmd := exec.Command(parts[0], append(parts[1:], e.file)...)
 	log.Println("Launching editor:", cmd.String())
 	return tea.ExecProcess(cmd, func(err error) tea.Msg {
 		log.Println("Editor finished with error:", err)
@@ -74,6 +77,9 @@ func (m MainScreen) EditCurrentItem() (tea.Model, tea.Cmd) {
 		editServer = true
 	} else {
 		peer := clientFromRow(m.app, m.table.GetSelected())
+		if peer == nil {
+			return m, nil
+		}
 		file = peer.GetFileName()
 	}
 

@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"io"
+	"net"
 	"strconv"
 )
 
@@ -75,7 +76,12 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 	}
 
 	_, _ = fmt.Fprintln(w, "AllowedIPs =", cr)
-	_, _ = fmt.Fprintln(w, "Endpoint =", server.ClientServerEndpoint+":"+strconv.Itoa(int(server.ListenPort)))
+	endpoint := server.ClientServerEndpoint
+	if ip := net.ParseIP(endpoint); ip != nil && ip.To4() == nil {
+		// a raw IPv6 endpoint must be bracketed in host:port
+		endpoint = "[" + endpoint + "]"
+	}
+	_, _ = fmt.Fprintln(w, "Endpoint =", endpoint+":"+strconv.Itoa(int(server.ListenPort)))
 
 	if server.ClientPersistentKeepalive != 0 {
 		_, _ = fmt.Fprintln(w, "PersistentKeepalive =", server.ClientPersistentKeepalive)

@@ -55,12 +55,13 @@ func NewClient(ip int, name string) *Client {
 
 func (c *Client) WriteOnce(dir string) error {
 	f, err := os.OpenFile(filepath.Join(dir, c.fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
-	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("Client.WriteOnce, can't create %s file %w", c.fileName, err)
 	}
+	writeConfigHeader(f)
 
 	if err := toml.NewEncoder(f).Encode(c); err != nil {
+		_ = f.Close()
 		return fmt.Errorf("Client.WriteOnce, error TOML encoding Server struct %w", err)
 	}
 

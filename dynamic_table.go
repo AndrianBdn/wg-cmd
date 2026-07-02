@@ -32,9 +32,10 @@ func (m *DynamicTableList) Up() {
 		m.selected--
 	}
 	h := m.tableSize.Height - 1
+	step := max(1, h/2)
 
 	if m.selected < m.offset {
-		m.offset -= h / 2
+		m.offset -= step
 		if m.offset < 0 {
 			m.offset = 0
 		}
@@ -46,11 +47,12 @@ func (m *DynamicTableList) Down() {
 		m.selected++
 	}
 	h := m.tableSize.Height - 1
+	step := max(1, h/2)
 
 	if m.selected >= m.offset+h {
-		m.offset += h / 2
-		if m.offset > len(m.rows)-h/2 {
-			m.offset = len(m.rows) - h/2
+		m.offset += step
+		if m.offset > len(m.rows)-step {
+			m.offset = len(m.rows) - step
 		}
 	}
 }
@@ -109,6 +111,19 @@ func (m *DynamicTableList) CopyTableState(table *DynamicTableList) {
 	m.tableSize = table.tableSize
 	m.offset = table.offset
 	m.selected = table.selected
+	// the new table may have fewer rows than the one the state came from
+	if m.selected >= len(m.rows) {
+		m.selected = len(m.rows) - 1
+	}
+	if m.selected < 0 {
+		m.selected = 0
+	}
+	if m.offset > m.selected {
+		m.offset = m.selected
+	}
+	if m.offset < 0 {
+		m.offset = 0
+	}
 }
 
 func (m *DynamicTableList) GetSelected() []string {

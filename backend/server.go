@@ -149,7 +149,7 @@ func readServer(dir string) (*Server, error) {
 		}
 		ones, _ := ipNet.Mask.Size()
 		if ones != 20 {
-			return nil, fmt.Errorf("address4 supports only /24 network")
+			return nil, fmt.Errorf("address4 supports only /20 network")
 		}
 		if ip4[3] != 1 {
 			return nil, fmt.Errorf("address4 Server IP must start with 1")
@@ -187,12 +187,13 @@ func readServer(dir string) (*Server, error) {
 
 func (s *Server) WriteOnce(dir string) error {
 	f, err := os.OpenFile(filepath.Join(dir, ServerFileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
-	writeConfigHeader(f)
 	if err != nil {
 		return fmt.Errorf("Server.WriteOnce, can't create %s file %w", ServerFileName, err)
 	}
+	writeConfigHeader(f)
 
 	if err := toml.NewEncoder(f).Encode(s); err != nil {
+		_ = f.Close()
 		return fmt.Errorf("Server.WriteOnce, error TOML encoding Server struct %w", err)
 	}
 

@@ -21,8 +21,9 @@ func newInterfaceScreen(app *app.App, sSize tea.WindowSizeMsg) interfaceScreen {
 	ti := textinput.New()
 	ti.Placeholder = "wg0  "
 	ti.Focus()
-	ti.CharLimit = 4
-	ti.Width = 4
+	// the validator accepts wg0..wg9999, i.e. up to 6 characters
+	ti.CharLimit = 6
+	ti.Width = 6
 	ti.PlaceholderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244")).Background(lipgloss.Color("7"))
 	ti.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("7"))
 	ti.Cursor.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Background(lipgloss.Color("6"))
