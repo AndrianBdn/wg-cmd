@@ -19,11 +19,12 @@ const (
 )
 
 type endpointScreen struct {
-	sSize   tea.WindowSizeMsg
-	state   int
-	spinner spinner.Model
-	logs    string
-	result  endpointStepResult
+	sSize    tea.WindowSizeMsg
+	state    int
+	spinner  spinner.Model
+	logs     string
+	result   endpointStepResult
+	fallback bool
 }
 
 func newEndpointStep(sSize tea.WindowSizeMsg) endpointScreen {
@@ -52,7 +53,13 @@ func (m endpointScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case sysinfo.DiscoverStep:
 		if msg.Result != "" {
 			m.result = endpointStepResult(msg.Result)
-			m.logs = m.appendLogs("", msg.Result)
+			m.fallback = msg.Fallback
+			if msg.Fallback {
+				// close the pending "checking ..." line with the last error
+				m.logs = m.appendLogs("", msg.Log)
+			} else {
+				m.logs = m.appendLogs("", msg.Result)
+			}
 			m.state = stateSuccess
 			return m, nil
 		}
@@ -122,9 +129,19 @@ func (m endpointScreen) View() string {
 	}
 
 	if m.state == stateSuccess {
+		finish := "Discovery finished. Press ENTER to continue."
+		if m.fallback {
+			finish = "Could not reach any IP discovery service.\n" +
+				"Falling back to this machine's local address: " + string(m.result) + "\n\n" +
+				"If this server is behind NAT, or this address is not reachable from the\n" +
+				"Internet, clients will not connect. You can change the endpoint later:\n" +
+				"select the server row in WG Commander and press F4 to edit\n" +
+				"ClientServerEndpoint.\n\n" +
+				"Press ENTER to continue."
+		}
 		top = lipgloss.JoinVertical(0,
 			top,
-			s.xText.Render("Discovery finished. Press ENTER to continue."),
+			s.xText.Render(finish),
 		)
 	}
 

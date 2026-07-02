@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/andrianbdn/wg-cmd/sysinfo"
@@ -44,8 +45,10 @@ type Server struct {
 	ClientServerEndpoint      string
 	MTU                       int
 	ClientPersistentKeepalive int
-	addrInfo4                 *addressInfo4
-	addrInfo6                 *addressInfo6
+	// informational only; zero (and omitted) for setups created before the field existed
+	CreatedAt time.Time `toml:",omitempty"`
+	addrInfo4 *addressInfo4
+	addrInfo6 *addressInfo6
 }
 
 type addressInfo4 struct {
@@ -128,6 +131,7 @@ func NewServerWithBlueprint(b ServerBlueprint) *Server {
 	s.ClientDNS = dnsString(b.DNS, b.Net6 != "" && b.Nat6)
 	s.ClientServerEndpoint = b.Endpoint
 	s.ClientPersistentKeepalive = 42
+	s.CreatedAt = time.Now().UTC().Truncate(time.Second)
 	return &s
 }
 

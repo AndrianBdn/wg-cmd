@@ -27,6 +27,7 @@ type viewPeerCopiedMsg struct {
 
 type ViewPeer struct {
 	title     string
+	created   string // " • created YYYY-MM-DD" suffix, "" for legacy peers
 	config    string
 	sSize     tea.WindowSizeMsg
 	qrEnabled bool
@@ -41,6 +42,7 @@ func NewViewPeer(sSize tea.WindowSizeMsg, app *app.App, cl *backend.Client) View
 	qrEnabled := true
 	qrMode := app.Settings.ViewerQRMode
 	title := ""
+	created := ""
 	var cfg string
 	var err error
 
@@ -55,6 +57,9 @@ func NewViewPeer(sSize tea.WindowSizeMsg, app *app.App, cl *backend.Client) View
 		ip6 := cl.GetIP6(app.State.Server)
 		if ip6 != "" {
 			title += " • IP6 " + ip6
+		}
+		if !cl.CreatedAt.IsZero() {
+			created = " • created " + cl.CreatedAt.Format("2006-01-02")
 		}
 	} else {
 		cfg = app.State.Server.GetInterfaceString()
@@ -75,6 +80,7 @@ func NewViewPeer(sSize tea.WindowSizeMsg, app *app.App, cl *backend.Client) View
 	return ViewPeer{
 		sSize:     sSize,
 		title:     title,
+		created:   created,
 		config:    cfg,
 		qrEnabled: qrEnabled,
 		qrMode:    qrMode,
@@ -159,8 +165,14 @@ func (m ViewPeer) View() string {
 		}
 	}
 
+	// append the creation date only when it fits, so the top bar never wraps
+	title := m.title
+	if m.created != "" && lipgloss.Width(title+m.created) <= m.sSize.Width {
+		title += m.created
+	}
+
 	return lipgloss.JoinVertical(0,
-		header.Render(m.title),
+		header.Render(title),
 		body.Render(config),
 		RenderHelpLine(m.sSize.Width, cKey, f9, f10),
 	)

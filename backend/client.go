@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
@@ -19,10 +20,13 @@ type Client struct {
 	fileName       string
 	PublicKey      string
 	PrivateKey     string
+	PresharedKey   string
 	ClientRoute    string
 	AddServerRoute string
 	MTU            int
 	DNS            string
+	// informational only; zero (and omitted) for peers created before the field existed
+	CreatedAt time.Time `toml:",omitempty"`
 }
 
 func ReadClient(dir string, fileName string, ipNum int, name string) (*Client, error) {
@@ -50,6 +54,13 @@ func NewClient(ip int, name string) *Client {
 	}
 	c.PrivateKey = key.String()
 	c.PublicKey = key.PublicKey().String()
+
+	psk, err := wgtypes.GenerateKey()
+	if err != nil {
+		panic("Can't generate wireguard pre-shared key, err: " + err.Error())
+	}
+	c.PresharedKey = psk.String()
+	c.CreatedAt = time.Now().UTC().Truncate(time.Second)
 	return &c
 }
 

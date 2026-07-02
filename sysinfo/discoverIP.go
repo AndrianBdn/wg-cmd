@@ -10,13 +10,14 @@ import (
 	"time"
 )
 
-var ipDiscoveryServices = []string{"https://ip4only.me/api/", "https://api.ipify.org/", "https://ifconfig.co/ip", ""}
+var ipDiscoveryServices = []string{"https://ip4only.me/api/", "https://api.ipify.org/", "https://ifconfig.co/ip"}
 
 type DiscoverStep struct {
-	Result  string
-	step    int
-	Service string
-	Log     string
+	Result   string
+	Fallback bool // Result is a local (default-route) address, not an externally verified IP
+	step     int
+	Service  string
+	Log      string
 }
 
 func NewDiscoverIPStep() DiscoverStep {
@@ -26,46 +27,52 @@ func NewDiscoverIPStep() DiscoverStep {
 	}
 }
 
+// DiscoverIP tries one service per call so the caller can render progress
+// between attempts; feed the returned step back in until Result is set.
+// When every service fails it falls back to the default-route local address
+// (correct for a server with its public IP on the interface; wrong behind
+// NAT) and sets Fallback so the UI can warn the user to verify the endpoint.
 func DiscoverIP(d DiscoverStep) DiscoverStep {
-	if d.Result != "" {
+	if d.Result != "" || d.step >= len(ipDiscoveryServices) {
 		return d
 	}
-	for idx, service := range ipDiscoveryServices {
-		if idx < d.step {
-			continue
-		}
-		if service == "" {
-			// fallback
-			d.Service = ""
-			d.Result = "127.0.0.1"
-			return d
-		}
 
-		strIP, err := getMyIPWithService(service)
-		if err != nil {
-			d.step++
-			d.Service = ipDiscoveryServices[d.step]
-			d.Log = err.Error()
-			return d
-		}
+	strIP, err := getMyIPWithService(ipDiscoveryServices[d.step])
+	if err == nil {
 		d.Result = strIP
 		return d
 	}
 
+	d.Log = err.Error()
+	d.step++
+	if d.step >= len(ipDiscoveryServices) {
+		d.Service = ""
+		d.Fallback = true
+		if ip, err := defaultRouteIP4(); err == nil {
+			d.Result = ip
+		} else {
+			d.Result = "127.0.0.1"
+		}
+		return d
+	}
+	d.Service = ipDiscoveryServices[d.step]
 	return d
 }
 
-func DiscoverIPOld() string {
-	for _, service := range ipDiscoveryServices {
-		fmt.Printf("- Using %s to determine our IP\n", service)
-		strIP, err := getMyIPWithService(service)
-		if err == nil {
-			fmt.Println("- Got response:", strIP)
-			return strIP
-		}
+// defaultRouteIP4 returns the IPv4 source address the kernel picks for the
+// default route. The UDP "connect" sends no packets — it only resolves
+// routing, so it needs no Internet access, just a route.
+func defaultRouteIP4() (string, error) {
+	conn, err := net.Dial("udp4", "8.8.8.8:53")
+	if err != nil {
+		return "", err
 	}
-	fmt.Println("- All ipDiscoveryServices failed, returning 127.0.0.1")
-	return "127.0.0.1"
+	defer conn.Close()
+	addr, ok := conn.LocalAddr().(*net.UDPAddr)
+	if !ok || addr.IP.To4() == nil {
+		return "", fmt.Errorf("cannot determine local IP4 address")
+	}
+	return addr.IP.String(), nil
 }
 
 func getMyIPWithService(serviceURL string) (string, error) {

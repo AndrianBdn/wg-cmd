@@ -22,14 +22,24 @@ func (s *State) generateWireguardConfig(w io.Writer) error {
 	})
 }
 
+// peerPresharedKey returns the PSK for the server↔client pair: the client's
+// own key when it has one, otherwise the legacy server-wide key (peers created
+// before per-peer PSKs; may be empty).
+func (s *Server) peerPresharedKey(c *Client) string {
+	if c.PresharedKey != "" {
+		return c.PresharedKey
+	}
+	return s.PresharedKey
+}
+
 func (s *Server) generateServerPeerConfig(client *Client, w io.Writer) error {
 	_, err := fmt.Fprintf(w, "\n# peer %s\n", client.name)
 	if err != nil {
 		return fmt.Errorf("generateServerConfig error %w", err)
 	}
 	_, _ = fmt.Fprintln(w, "[Peer]")
-	if s.PresharedKey != "" {
-		_, _ = fmt.Fprintln(w, "PresharedKey =", s.PresharedKey)
+	if psk := s.peerPresharedKey(client); psk != "" {
+		_, _ = fmt.Fprintln(w, "PresharedKey =", psk)
 	}
 	_, _ = fmt.Fprintln(w, "PublicKey =", client.PublicKey)
 
@@ -66,8 +76,8 @@ func (c *Client) generateClientConfig(server *Server, w io.Writer) error {
 	}
 
 	_, _ = fmt.Fprintln(w, "\n[Peer]")
-	if server.PresharedKey != "" {
-		_, _ = fmt.Fprintln(w, "PresharedKey =", server.PresharedKey)
+	if psk := server.peerPresharedKey(c); psk != "" {
+		_, _ = fmt.Fprintln(w, "PresharedKey =", psk)
 	}
 	_, _ = fmt.Fprintln(w, "PublicKey =", server.PublicKey)
 	cr := c.ClientRoute
