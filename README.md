@@ -60,7 +60,7 @@ Note regarding the QR code: some devices (Android?) may require a higher quality
 You can run WG Commander as a non-root user if you change permissions on 
 /etc/wireguard and configure sysctl/systemd manually.
 
-WG Commander keeps its own UI config in `~/.config/wg-cmd/wg-cmd.toml`
+WG Commander keeps its own UI config in `~/.config/wg-cmd/config.toml`
 
 The most important options are:
 ```toml
