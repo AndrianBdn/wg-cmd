@@ -1,4 +1,4 @@
-VERSION=0.1.9
+VERSION=0.1.10
 BUILD=`git rev-parse --short=8 HEAD`
 .PHONY: all fmt static precommit arm64 amd64 fmt static test release release_dir
 
@@ -35,5 +35,6 @@ release_dir:
 	mkdir -p release
 
 release: arm64 amd64
+	cd release && shasum -a 256 ${BINARY}-linux-amd64 ${BINARY}-linux-arm64 > SHA256SUMS
 
 precommit: fmt static test
