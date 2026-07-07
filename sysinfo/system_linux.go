@@ -152,13 +152,22 @@ func createSystemdPathForInterface(iface, wgdir string) error {
 	return nil
 }
 
-func createSystemdTargetService(iface string) error {
+func createSystemdTargetService(iface, wgdir string) error {
 	pathName := pathNameForInterface(iface)
 	targetServiceName := serviceNameForInterface(iface)
+	wgConf := filepath.Join(wgdir, iface+".conf")
 
-	targetService := fmt.Sprintf("[Unit]\nDescription=Restart WireGuard %s\nAfter=network.target", iface)
-	targetService += fmt.Sprintf("\n\n[Service]\nType=oneshot\n"+
-		"ExecStart=/usr/bin/systemctl restart wg-quick@%s.service", iface)
+	// sync the live interface instead of restarting it so existing tunnel
+	// sessions (e.g. SSH over the VPN) survive config edits; restart only
+	// when the interface is down
+	applyCmd := fmt.Sprintf(
+		"/bin/sh -c 'if wg show %s >/dev/null 2>&1; "+
+			"then wg-quick strip %s | wg syncconf %s /dev/stdin; "+
+			"else systemctl restart wg-quick@%s.service; fi'",
+		iface, wgConf, iface, iface)
+
+	targetService := fmt.Sprintf("[Unit]\nDescription=Apply WireGuard %s config\nAfter=network.target", iface)
+	targetService += "\n\n[Service]\nType=oneshot\nExecStart=" + applyCmd
 	targetService += "\n\n[Install]\nRequiredBy=" + pathName + "\n"
 
 	targetServiceLoc := filepath.Join("/etc/systemd/system", targetServiceName)
@@ -217,11 +226,28 @@ func reloadAndEnableSystemdStuff(iface string) error {
 	return nil
 }
 
+// UpdateSystemdUnit rewrites an existing wgc-<iface> service with the current
+// template (syncconf instead of restart) and reloads systemd.
+func UpdateSystemdUnit(iface, wgdir string) error {
+	unitPath := filepath.Join("/etc/systemd/system", serviceNameForInterface(iface))
+	if _, err := os.Stat(unitPath); err != nil {
+		return fmt.Errorf("no unit at %s (was it created by the setup wizard?): %w", unitPath, err)
+	}
+	if err := createSystemdTargetService(iface, wgdir); err != nil {
+		return err
+	}
+	cmd := exec.Command("systemctl", "daemon-reload")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to reload systemd: %w", err)
+	}
+	return nil
+}
+
 func CreateSystemdStuff(iface, wgdir string) error {
 	if err := createSystemdPathForInterface(iface, wgdir); err != nil {
 		return err
 	}
-	if err := createSystemdTargetService(iface); err != nil {
+	if err := createSystemdTargetService(iface, wgdir); err != nil {
 		return err
 	}
 

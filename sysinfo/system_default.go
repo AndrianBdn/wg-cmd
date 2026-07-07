@@ -27,6 +27,10 @@ func CreateSystemdStuff(iface, wgdir string) error {
 	return errors.New("not implemented")
 }
 
+func UpdateSystemdUnit(iface, wgdir string) error {
+	return errors.New("not implemented")
+}
+
 func HasIPTables() bool {
 	return os.Getenv("WG_CMD_NO_DEPS") != ""
 }

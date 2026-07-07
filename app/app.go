@@ -34,6 +34,12 @@ func NewApp() *App {
 		Settings: settings,
 	}
 
+	if settings.cliCommand == "update-systemd-unit" {
+		// needs no interface state; skip loading and wizard checks so their
+		// error exits can't shadow the command
+		return &a
+	}
+
 	log.Println("Loading interface", a.Settings.DefaultInterface)
 	err = a.LoadInterface(a.Settings.DefaultInterface)
 	log.Println("error", err, "state", a.State != nil)
@@ -68,7 +74,20 @@ func NewApp() *App {
 }
 
 func (a *App) RunCli() {
-	// we currently only support "make" command to rebuild Wireguard config
+	if a.Settings.cliCommand == "update-systemd-unit" {
+		iface := a.Settings.cliArg
+		if !regexp.MustCompile(`^wg\d{1,4}$`).MatchString(iface) {
+			fmt.Printf("Usage: %s update-systemd-unit <wg-interface>\n", os.Args[0])
+			os.Exit(1)
+		}
+		if err := sysinfo.UpdateSystemdUnit(iface, a.Settings.WireguardDir); err != nil {
+			fmt.Println("Error updating systemd unit:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Updated wgc-%s.service: config changes now apply via wg syncconf (no interface restart)\n", iface)
+		os.Exit(0)
+	}
+
 	if a.Settings.cliCommand == "make" {
 		if a.State == nil {
 			fmt.Printf("No interface selected. Run \"%s <wg-interface> make\"\n", os.Args[0])

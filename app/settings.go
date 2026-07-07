@@ -16,6 +16,7 @@ type Settings struct {
 	ViewerQRMode     bool
 
 	cliCommand    string
+	cliArg        string
 	saveInterface bool
 }
 
@@ -83,6 +84,14 @@ func (s *Settings) applyCommandLine() {
 	arg := args[0]
 	if arg == "make" {
 		s.cliCommand = "make"
+		return
+	}
+
+	if arg == "update-systemd-unit" {
+		s.cliCommand = "update-systemd-unit"
+		if len(args) > 1 {
+			s.cliArg = args[1]
+		}
 		return
 	}
 

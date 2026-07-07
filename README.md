@@ -81,6 +81,10 @@ Run `wg-cmd <wg-interface>` to switch to specific interface (must be created bef
 
 Run `wg-cmd <wg-interface> make` to generate Wireguard configuration without showing UI.
 
+Run `wg-cmd update-systemd-unit <wg-interface>` to upgrade the systemd unit created by
+older versions: the new unit applies config changes with `wg syncconf` instead of
+restarting the interface, so existing tunnel connections (e.g. SSH over the VPN) survive edits.
+
 ### Configuration 
 
 WG Commander uses directories as its "database". 
