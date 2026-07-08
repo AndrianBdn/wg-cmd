@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=AndrianBdn&project=wg-cmd&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 # WG Commander 
 
 aka "wg-cmd" — TUI for managing WireGuard configuration files
